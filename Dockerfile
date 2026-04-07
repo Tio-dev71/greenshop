@@ -12,10 +12,8 @@ COPY . .
 
 RUN a2enmod rewrite
 
-# Đổi DocumentRoot sang public
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# Cho phép .htaccess hoạt động trong thư mục public
 RUN printf '<Directory /var/www/html/public>\n\
     AllowOverride All\n\
     Require all granted\n\
@@ -24,11 +22,20 @@ RUN printf '<Directory /var/www/html/public>\n\
 
 RUN composer install --no-dev --optimize-autoloader
 
+# Tạo đủ thư mục Laravel cần để chạy runtime
+RUN mkdir -p \
+    /var/www/html/storage/framework/cache \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/views \
+    /var/www/html/storage/logs \
+    /var/www/html/bootstrap/cache
+
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
 RUN php artisan config:clear || true
 RUN php artisan route:clear || true
 RUN php artisan view:clear || true
-
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
