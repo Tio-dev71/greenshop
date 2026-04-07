@@ -12,8 +12,15 @@ COPY . .
 
 RUN a2enmod rewrite
 
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
-    && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf
+# Đổi DocumentRoot sang public
+RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# Cho phép .htaccess hoạt động trong thư mục public
+RUN printf '<Directory /var/www/html/public>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>\n' > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
 
 RUN composer install --no-dev --optimize-autoloader
 
