@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/User-info.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Additional styles for Notification.html - can be moved to a separate CSS file */
+        .notification-container {
+            padding: 30px;
+            background-color: #fff;
+            margin: 20px 0;
+            max-width: 800px; /* Wider for notification list */
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .notification-header h1 {
+            margin: 0;
+        }
+        .btn-mark-all-read {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .btn-mark-all-read:hover {
+            background-color: #0056b3;
+        }
+        .notification-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .notification-item.unread {
+            background-color: #f8f9fa; /* Light background for unread items */
+            border-left: 3px solid #007bff; /* Indicator for unread */
+        }
+        .notification-content {
+            flex-grow: 1;
+        }
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .notification-description {
+            font-size: 0.95em;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+        .notification-date {
+            font-size: 0.85em;
+            color: #777;
+        }
+        .notification-actions button {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 5px;
+        }
+        .notification-actions button:hover {
+            text-decoration: underline;
+        }
+        .pagination-controls { /* Copied from order-history for consistency */
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination-controls button {
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination-controls button.active {
+            background-color: #4CAF50; /* GreenFood theme color */
+            color: white;
+            border-color: #4CAF50;
+        }
+        .pagination-controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        #notification-page-message { /* For general messages on this page */
+            text-align: center; padding: 10px; margin-bottom: 15px; border-radius: 4px; min-height: 20px;
+        }
+        #no-notifications-message {
+            text-align:center; padding: 20px; display:none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a>
+    </div>
+    <div class="icons">
+    <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+    <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+    <a href="Notification.html" title="Thông báo"><i class="fas fa-bell"></i> <span id="unread-notifications-badge" style="display:none; background-color: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em; position: relative; top: -8px; left: -5px;"></span></a>
+    <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+    <i class="fas fa-arrow-right" id="logout-icon-notification" title="Đăng xuất" style="cursor:pointer;"></i>
+    </div>
+</header>
+
+<main>
+    <section class="notification-container">
+        <div class="notification-header">
+            <h1>Thông Báo</h1>
+            <button id="mark-all-read-btn" class="btn-mark-all-read">Đánh dấu tất cả là đã đọc</button>
+        </div>
+        <div id="notification-page-message" class="message-area"></div>
+
+        <ul id="notification-list" class="notification-list">
+        </ul>
+        <div id="no-notifications-message">
+            <p>Bạn không có thông báo nào.</p>
+        </div>
+
+        <div id="notification-pagination-controls" class="pagination-controls">
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name">Công ty thực phẩm GreenFood</p>
+        <p class="web-author">75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script src="assets/js/Notification.js"></script>
+</body>
+</html>

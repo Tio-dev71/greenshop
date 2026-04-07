@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/Checkout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a>
+    </div>
+    <div class="icons">
+        <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+        <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+        <a href="Notification.html"><i class="fas fa-bell"></i></a>
+        <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+        <i class="fas fa-arrow-right" id="logout-icon-checkout" title="Đăng xuất" style="cursor:pointer;"></i>
+    </div>
+</header>
+
+<main>
+    <section class="checkout-container">
+        <h1>THANH TOÁN</h1>
+        <div id="checkout-message" class="checkout-message" style="text-align:center; margin-bottom:15px; min-height: 20px;"></div>
+
+        <div class="checkout-content">
+            <div class="shipping-details">
+                <h2>Thông tin giao hàng</h2>
+                <form id="shipping-form" class="shipping-form">
+                    <div class="form-group">
+                        <label for="user-addresses">Chọn địa chỉ đã lưu:</label>
+                        <select id="user-addresses" name="user_addresses">
+                            <option value="">--- Chọn địa chỉ ---</option>
+                            <option value="new">--- Thêm địa chỉ mới ---</option>
+                        </select>
+                    </div>
+                    <hr style="margin: 20px 0;">
+                    <h3>Hoặc nhập địa chỉ mới:</h3>
+                    <div class="form-group">
+                        <label for="customerName">Họ và tên người nhận</label>
+                        <input type="text" id="customerName" name="CustomerName" placeholder="Nhập họ và tên" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Số điện thoại người nhận</label>
+                        <input type="tel" id="phoneNumber" name="PhoneNumber" placeholder="Nhập số điện thoại" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="street">Địa chỉ cụ thể (Số nhà, tên đường)</label>
+                        <input type="text" id="street" name="Street" placeholder="Ví dụ: 123 Đường ABC" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ward">Phường/Xã</label>
+                        <input type="text" id="ward" name="Ward" placeholder="Ví dụ: Phường XYZ" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="district">Quận/Huyện</label>
+                        <input type="text" id="district" name="District" placeholder="Ví dụ: Quận KLM" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="order-summary">
+                <h2>Thông tin đơn hàng</h2>
+                <div id="order-items-summary" class="order-items">
+                    <p>Đang tải thông tin giỏ hàng...</p>
+                </div>
+
+                <div class="order-totals">
+                    <div class="subtotal">
+                        <span>Tạm tính:</span>
+                        <span id="summary-subtotal">0₫</span>
+                    </div>
+                    <div class="total">
+                        <span>Tổng cộng:</span>
+                        <span id="summary-total">0₫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-methods">
+            <h2>Phương thức thanh toán</h2>
+            <div class="payment-options">
+                <div class="payment-option">
+                    <input type="radio" id="cod" name="payment_method" value="COD" checked>
+                    <label for="cod">Thanh toán khi nhận hàng (COD)</label>
+                </div>
+                <div class="payment-option">
+                    <input type="radio" id="onlinebanking" name="payment_method" value="OnlineBanking">
+                    <label for="onlinebanking">Chuyển khoản ngân hàng</label>
+                    <div id="bank-transfer-info" style="display: none;">
+                        <p>Vui lòng chuyển khoản vào thông tin tài khoản sau:</p>
+                        <p><strong>Ngân hàng:</strong> MB BANK</p>
+                        <p><strong>Số tài khoản:</strong> 0374850890</p>
+                        <p><strong>Chủ tài khoản:</strong> NGUYEN VAN QUY</p>
+                        <p><strong>Nội dung chuyển khoản:</strong> Ghi rõ Email hoặc Số điện thoại (nếu có)</p>
+                        <p><small>Đơn hàng sẽ được xử lý sau khi chúng tôi xác nhận thanh toán từ bạn.</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checkout-actions">
+            <a href="Cart.html" class="back-to-cart">Quay lại giỏ hàng</a>
+            <button id="place-order-btn" class="place-order-btn">Đặt hàng</button>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name"> Công ty thực phẩm GreenFood</p>
+        <p class="web-author"> 75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script src="assets/js/Checkout.js"></script>
+</body>
+</html>

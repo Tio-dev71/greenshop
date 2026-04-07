@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/Signup.css">
+</head>
+<body class="page-shell auth-page signup-page">
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="index.html" class="brand">
+            <img src="assets/img/logo.png" alt="GreenFood Logo">
+            <div class="brand-text">
+                <strong>GreenFood</strong>
+                <span>Tạo tài khoản mới để bắt đầu mua sắm</span>
+            </div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html" class="header-link">Trang giới thiệu</a>
+            <a href="Login.html" class="btn btn-secondary">Đã có tài khoản</a>
+        </nav>
+    </div>
+</header>
+
+<main class="auth-main">
+    <div class="container auth-layout">
+        <section class="auth-showcase glass">
+            <div class="auth-copy">
+                <span class="eyebrow">✨ Tạo tài khoản mới</span>
+                <h1>Tham gia GreenFood để lưu địa chỉ, quản lý đơn và mua thực phẩm sạch thuận tiện hơn.</h1>
+                <p>Nền tảng mua bán thực phẩm sạch hàng đầu Việt Nam.</p>
+                <div class="auth-points">
+                    <div><strong>Giao diện</strong><span>Dễ nhìn - Dễ sử dụng</span></div>
+                    <div><strong>Thương hiệu</strong><span>Uy tín - Tin dùng</span></div>
+                    <div><strong>Thân thiện</strong><span>Hỗ trợ tận tình</span></div>
+                </div>
+            </div>
+            <img src="assets/img/background.jpg" alt="BackGround">
+        </section>
+
+        <section class="auth-form-panel card">
+            <div class="panel-heading">
+                <h2>Đăng ký</h2>
+                <p>Tạo tài khoản chỉ với vài thông tin cơ bản.</p>
+            </div>
+            <form action="" method="POST" class="form auth-form" id="form-1">
+                <div class="form-group">
+                    <label for="name" class="form-label">Họ tên</label>
+                    <input id="name" name="name" type="text" placeholder="Nguyễn Văn A" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" name="email" type="text" placeholder="example@email.com" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <input id="password" name="password" type="password" placeholder="Ít nhất 6 ký tự" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirmation" class="form-label">Nhập lại mật khẩu</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" placeholder="Nhập lại mật khẩu" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <p id="signup-message" class="status-text"></p>
+                <button type="submit" class="form-submit">Đăng ký</button>
+            </form>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-copy">
+            <strong>Công ty thực phẩm GreenFood</strong>
+            <span>Nền tảng mua bán thực phẩm sạch hàng đầu Việt Nam.</span>
+        </div>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const apiBase = window.location.origin;
+
+    const signupForm = document.getElementById('form-1');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const passwordConfirmationInput = document.getElementById('password_confirmation');
+    const submitButton = signupForm.querySelector('button[type="submit"]');
+    const messageElement = document.getElementById('signup-message');
+
+    function displayMessage(text, isError = false) {
+        if (messageElement) {
+            messageElement.textContent = text;
+            messageElement.style.color = isError ? 'red' : 'green';
+        } else {
+            alert(text);
+        }
+    }
+
+    if (signupForm && nameInput && emailInput && passwordInput && passwordConfirmationInput && submitButton) {
+        signupForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if(messageElement) messageElement.textContent = '';
+
+            const payload = {
+                name: nameInput.value.trim(),
+                email: emailInput.value.trim(),
+                password: passwordInput.value,
+                password_confirmation: passwordConfirmationInput.value
+            };
+
+            if (!payload.name || !payload.email || !payload.password || !payload.password_confirmation) {
+                displayMessage('Vui lòng điền đầy đủ thông tin.', true);
+                return;
+            }
+            if (payload.password.length < 6) {
+                displayMessage('Mật khẩu phải có ít nhất 6 ký tự.', true);
+                return;
+            }
+            if (payload.password !== payload.password_confirmation) {
+                displayMessage('Mật khẩu nhập lại không khớp.', true);
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Đang xử lý...';
+
+            try {
+                const response = await fetch(`${apiBase}/api/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    const textResponse = await response.text();
+                    throw new Error(`Server response (status ${response.status}) was not valid JSON. Response text: ${textResponse}`);
+                }
+
+                if (response.ok) {
+                    displayMessage('Đăng ký thành công! Chuẩn bị chuyển hướng...', false);
+                    setTimeout(() => {
+                        window.location.href = 'Login.html';
+                    }, 2000);
+                } else {
+                    let errorMessage = 'Đăng ký thất bại. ';
+                    if (data && data.errors) {
+                        for (const key in data.errors) {
+                            errorMessage += `${data.errors[key].join(', ')} `;
+                        }
+                    } else if (data && data.message) {
+                        errorMessage += data.message;
+                    } else {
+                        errorMessage += `Lỗi máy chủ (${response.status}).`;
+                    }
+                    displayMessage(errorMessage, true);
+                }
+
+            } catch (error) {
+                displayMessage(`Lỗi: ${error.message || 'Không thể kết nối hoặc xử lý yêu cầu.'}`, true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Đăng ký';
+            }
+        });
+    }
+</script>
+</body>
+</html>

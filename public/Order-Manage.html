@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/Order-Manage.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<script>
+    // Script bảo vệ trang admin
+    (function protectAdminPage() {
+        const token = localStorage.getItem('authToken');
+        const authUserString = localStorage.getItem('authUser');
+        let isAdmin = false;
+        if (token && authUserString) {
+            try {
+                const authUser = JSON.parse(authUserString);
+                if (authUser && authUser.Role === 1) isAdmin = true;
+            } catch (e) { console.error("Error parsing authUser for admin check", e); }
+        }
+        if (!isAdmin) {
+            console.log('Access to admin page denied. Redirecting to login.');
+            localStorage.removeItem('authToken'); localStorage.removeItem('authUser');
+            window.location.href = 'Login.html';
+        } else {
+            console.log('Admin access granted.');
+        }
+    })();
+</script>
+<div class="container">
+    <aside class="sidebar">
+        <a href="Homepage.html" class="logo"> <img src="assets/img/logo.png" alt="GreenFood Logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="Product-Manage.html" class="QLSP">Quản lý sản phẩm</a></li>
+                <li><a href="User-Manage.html" class="QLTK">Quản lý tài khoản</a></li>
+                <li class="menu-item">
+                    <a href="Order-Manage.html" class="QLDH">Quản lý đơn hàng</a>
+                    <img src="assets/img/red-stick.png" alt="Stick" class="stick">
+                </li>
+                <li><a href="Revenue-Manage.html" class="QLDT">Quản lý doanh thu</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a class="logout" id="admin-logout-button" href="#">Đăng xuất</a>
+        </div>
+    </aside>
+    <main class="content">
+        <header class="header">
+            <div class="left-header">QUẢN LÝ ĐƠN HÀNG</div>
+            <div class="right-header">
+                <span id="admin-name-display" style="margin-right: 10px;"></span>
+                <div class="avatar"><img src="assets/img/Admin-avatar.png" alt="Avatar"></div>
+            </div>
+        </header>
+        <div class="main-content">
+            <div class="search-filter">
+                <div class="search-box">
+                    <input type="text" id="order-search-input" placeholder="Tìm theo Mã ĐH, Tên KH, Email KH...">
+                </div>
+                <div class="filter-section">
+                    <div class="filter-option">
+                        <label for="status-filter-select">Trạng thái:</label>
+                        <select id="status-filter-select" class="status-filter">
+                            <option value="">Tất cả</option>
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="processing">Đang xử lý</option>
+                            <option value="shipped">Đang giao</option>
+                            <option value="delivered">Đã giao</option>
+                            <option value="cancelled">Đã hủy</option>
+                            <option value="failed">Thất bại</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="order-manager-message" class="message-area" style="text-align:center; margin-bottom:15px;"></div>
+            <table class="order-table">
+                <thead class="thead">
+                <tr>
+                    <th>Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>Email KH</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody id="order-table-body">
+                </tbody>
+            </table>
+            <div class="pagination" id="pagination-controls">
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="orderDetailModal" class="order-detail-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Chi tiết đơn hàng #<span id="modal-order-id-display"></span></h2>
+            <span class="close-modal" id="closeOrderDetailModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="modal-message-area" class="message-area" style="margin-bottom: 15px;"></div>
+            <div class="order-info">
+                <div class="info-section">
+                    <h3>Thông tin đơn hàng</h3>
+                    <p><strong>Mã đơn hàng:</strong> <span id="modal-detail-order-id"></span></p>
+                    <p><strong>Ngày đặt:</strong> <span id="modal-detail-order-date"></span></p>
+                    <p><strong>Trạng thái:</strong> <span id="modal-detail-order-status" class="status"></span></p>
+                    <p><strong>Phương thức thanh toán:</strong> <span id="modal-detail-payment-method"></span></p>
+                </div>
+                <div class="info-section">
+                    <h3>Thông tin khách hàng</h3>
+                    <p><strong>Họ tên:</strong> <span id="modal-detail-customer-name"></span></p>
+                    <p><strong>Email:</strong> <span id="modal-detail-customer-email"></span></p>
+                    <p><strong>Số điện thoại:</strong> <span id="modal-detail-customer-phone"></span></p>
+                    <p><strong>Địa chỉ giao hàng:</strong> <span id="modal-detail-shipping-address"></span></p>
+                </div>
+            </div>
+            <div class="order-products">
+                <h3>Danh sách sản phẩm</h3>
+                <table class="products-table">
+                    <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Giá lúc đặt</th>
+                        <th>Số lượng</th>
+                        <th>Giảm giá lúc đặt</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody id="modal-detail-products-tbody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="order-summary">
+                <div class="summary-item total">
+                    <span>Tổng cộng:</span>
+                    <span id="modal-detail-total-amount"></span>
+                </div>
+            </div>
+            <div class="update-status">
+                <h3>Cập nhật trạng thái</h3>
+                <select id="modal-status-select" class="status-select">
+                    <option value="pending">Chờ xác nhận</option>
+                    <option value="processing">Đang xử lý</option>
+                    <option value="shipped">Đang giao</option>
+                    <option value="delivered">Đã giao</option>
+                    <option value="cancelled">Đã hủy</option>
+                    <option value="failed">Thất bại</option>
+                </select>
+                <button id="modal-update-status-btn" class="update-btn">Cập nhật</button>
+                <input type="hidden" id="modal-current-order-id-hidden">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/Order-Manage.js"></script> </body>
+</html>

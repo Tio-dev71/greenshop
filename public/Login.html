@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/Login.css">
+</head>
+<body class="page-shell auth-page">
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="index.html" class="brand">
+            <img src="assets/img/logo.png" alt="GreenFood Logo">
+            <div class="brand-text">
+                <strong>GreenFood</strong>
+                <span>Đăng nhập để tiếp tục mua sắm</span>
+            </div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html" class="header-link">Trang giới thiệu</a>
+            <a href="Signup.html" class="btn btn-primary">Tạo tài khoản</a>
+        </nav>
+    </div>
+</header>
+
+<main class="auth-main">
+    <div class="container auth-layout">
+        <section class="auth-showcase glass">
+            <div class="auth-copy">
+                <span class="eyebrow">🌿 Chào mừng quay lại</span>
+                <h1>Đăng nhập để xem giỏ hàng, theo dõi đơn và mua nhanh hơn.</h1>
+                <p>Nền tảng mua bán thực phẩm sạch hàng đầu Việt Nam.</p>
+                <div class="auth-points">
+                    <div><strong>Hỏa Tốc</strong><span>Giao hàng siêu nhanh đảm bảo</span></div>
+                    <div><strong>Độ Tín Cậy</strong><span>Đầy đủ giấy chứng nhận thực phẩm sạch</span></div>
+                    <div><strong>Đa dạng</strong><span>Đa dạng sản phẩm, thực phẩm sạch</span></div>
+                </div>
+            </div>
+            <img src="assets/img/background.jpg" alt="BackGround">
+        </section>
+
+        <section class="auth-form-panel card">
+            <div class="panel-heading">
+                <h2>Đăng nhập</h2>
+                <p>Bắt đầu mua sắm ngay cùng GreenFood.</p>
+            </div>
+            <form action="" method="POST" class="form auth-form" id="form-1">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" name="email" type="text" placeholder="Email" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <input id="password" name="password" type="password" placeholder="Mật khẩu" class="form-control">
+                    <span class="form-message"></span>
+                </div>
+
+                <p id="login-error" class="status-text"></p>
+                <button type="button" class="form-submit" id="login-button">Đăng nhập</button>
+
+                <div class="register-link">
+                    Chưa có tài khoản? <a href="Signup.html">Đăng ký ngay</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-copy">
+            <strong>Công ty thực phẩm GreenFood</strong>
+            <span>Nền tảng mua bán thực phẩm sạch hàng đầu Việt Nam.</span>
+        </div>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const loginForm = document.getElementById('form-1');
+    const loginButton = document.getElementById('login-button');
+    const errorElement = document.getElementById('login-error');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    const apiBase = window.location.origin;
+
+    (function checkAlreadyLoggedIn() {
+        const token = localStorage.getItem('authToken');
+        const authUserString = localStorage.getItem('authUser');
+
+        if (token && authUserString) {
+            try {
+                const authUser = JSON.parse(authUserString);
+                if (authUser && authUser.Role === 1) {
+                    window.location.href = 'Product-Manage.html';
+                } else {
+                    window.location.href = 'Homepage.html';
+                }
+            } catch (e) {
+                console.error("Error parsing authUser from localStorage or checking role:", e);
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('authUser');
+            }
+        }
+    })();
+
+    if (loginButton && emailInput && passwordInput && errorElement) {
+        loginButton.addEventListener('click', async function(event) {
+            event.preventDefault();
+            errorElement.textContent = '';
+
+            const payload = {
+                email: emailInput.value.trim(),
+                password: passwordInput.value
+            };
+
+            if (!payload.email || !payload.password) {
+                errorElement.textContent = 'Vui lòng nhập email và mật khẩu.';
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Đang xử lý...';
+
+            try {
+                const response = await fetch(`${apiBase}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    const textResponse = await response.text();
+                    throw new Error(`Server response (status ${response.status}) was not valid JSON. Response text: ${textResponse}`);
+                }
+
+                if (response.ok && data.access_token && data.user) {
+                    localStorage.setItem('authToken', data.access_token);
+                    localStorage.setItem('authUser', JSON.stringify(data.user));
+
+                    errorElement.style.color = 'green';
+                    errorElement.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+
+                    setTimeout(() => {
+                        if (data.user.Role === 1) {
+                            window.location.href = 'Product-Manage.html';
+                        } else {
+                            window.location.href = 'Homepage.html';
+                        }
+                    }, 1500);
+
+                } else {
+                    let errorMessage = 'Đăng nhập thất bại.';
+                    if (data.errors && data.errors.email && Array.isArray(data.errors.email)) {
+                        errorMessage = data.errors.email.join(' ');
+                    } else if (data.message) {
+                        errorMessage = data.message;
+                    }
+                    errorElement.style.color = 'red';
+                    errorElement.textContent = errorMessage;
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Đăng nhập';
+                }
+
+            } catch (error) {
+                errorElement.style.color = 'red';
+                errorElement.textContent = error.message || 'Lỗi kết nối hoặc xử lý. Vui lòng thử lại.';
+                loginButton.disabled = false;
+                loginButton.textContent = 'Đăng nhập';
+            }
+        });
+    }
+</script>
+</body>
+</html>

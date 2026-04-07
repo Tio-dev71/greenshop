@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/Cart.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a>
+    </div>
+    <div class="icons">
+        <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+        <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+        <a href="Notification.html"><i class="fas fa-bell"></i></a>
+        <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+        <i class="fas fa-arrow-right" id="logout-icon-cart" title="Đăng xuất" style="cursor:pointer;"></i>
+    </div>
+</header>
+
+<main>
+    <section class="cart-container">
+        <h1>GIỎ HÀNG CỦA BẠN</h1>
+        <div id="cart-message" class="cart-message" style="text-align:center; margin-bottom:15px; min-height: 20px;"></div>
+
+        <div id="cart-content-wrapper">
+            <table class="cart-table">
+                <thead>
+                <tr>
+                    <th style="width: 40%;">Sản phẩm</th>
+                    <th style="width: 20%;">Đơn giá</th>
+                    <th style="width: 15%;">Số lượng</th>
+                    <th style="width: 20%;">Thành tiền</th>
+                    <th style="width: 5%;">Xoá</th>
+                </tr>
+                </thead>
+                <tbody id="cart-items-body">
+                </tbody>
+            </table>
+
+            <div class="cart-summary">
+                <div class="total-items" style="text-align: right; margin-top: 10px; font-size: 1em;">
+                    Tổng số mặt hàng: <span id="total-unique-items-count">0</span>
+                </div>
+                <div class="total-quantity" style="text-align: right; margin-top: 5px; font-size: 1em;">
+                    Tổng số sản phẩm: <span id="total-quantity-items-count">0</span>
+                </div>
+                <div class="total-price" style="text-align: right; font-size: 1.4em; font-weight: bold; margin-top: 10px;">
+                    Tổng tiền: <span id="total-cart-price">0₫</span>
+                </div>
+                <div class="cart-actions" style="text-align: right; margin-top: 20px;">
+                    <button id="clear-cart-btn" class="btn btn-danger" style="margin-right:10px; background-color: #e74c3c; color:white; padding: 10px 15px; border:none; border-radius:4px; cursor:pointer;">Xóa hết giỏ hàng</button>
+                    <a href="Checkout.html" id="checkout-link">
+                        <button id="checkout-now-btn" class="btn btn-success" style="background-color: #4CAF50; color:white; padding: 12px 25px; border:none; border-radius:4px; cursor:pointer; font-size: 1.1em;">Thanh toán ngay</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="cart-empty-message" style="text-align:center; padding: 30px; display:none;">
+            <h2>Giỏ hàng của bạn đang trống!</h2>
+            <p><a href="Product-list.html" style="color: #4CAF50; text-decoration: underline;">Tiếp tục mua sắm</a></p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name"> Công ty thực phẩm GreenFood</p>
+        <p class="web-author"> 75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+<script src="assets/js/Cart.js"></script>
+</body>
+</html>

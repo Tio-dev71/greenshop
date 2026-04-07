@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý doanh thu | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/Revenue-Manage.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<script>
+    // Script bảo vệ trang admin
+    (function protectAdminPage() {
+        const token = localStorage.getItem('authToken');
+        const authUserString = localStorage.getItem('authUser');
+        let isAdmin = false;
+        if (token && authUserString) {
+            try {
+                const authUser = JSON.parse(authUserString);
+                if (authUser && authUser.Role === 1) isAdmin = true;
+            } catch (e) { console.error("Error parsing authUser for admin check", e); }
+        }
+        if (!isAdmin) {
+            console.log('Access to admin page denied. Redirecting to login.');
+            localStorage.removeItem('authToken'); localStorage.removeItem('authUser');
+            window.location.href = 'Login.html';
+        } else {
+            console.log('Admin access granted.');
+        }
+    })();
+</script>
+<div class="container">
+    <aside class="sidebar">
+        <a href="Homepage.html" class="logo">
+            <img src="assets/img/logo.png" alt="Logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="Product-Manage.html">Quản lý sản phẩm</a></li>
+                <li><a href="User-Manage.html">Quản lý tài khoản</a></li>
+                <li><a href="Order-Manage.html">Quản lý đơn hàng</a></li>
+                <li class="menu-item">
+                    <a href="Revenue-Manage.html" class="QLDT">Quản lý doanh thu</a>
+                    <img src="assets/img/red-stick.png" alt="Stick" class="stick">
+                </li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a class="logout" id="admin-logout-button" href="#">Đăng xuất</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="header">
+            <div class="left-header">QUẢN LÝ DOANH THU</div>
+            <div class="right-header">
+                <span id="admin-name-display" style="margin-right: 10px;"></span>
+                <div class="avatar"><img src="assets/img/Admin-avatar.png" alt="Avatar"></div>
+            </div>
+        </header>
+
+        <section class="main-content">
+            <div class="search-filter">
+                <div class="filter-section">
+                    <div class="filter-option">
+                        <label for="group-by-select">Thống kê theo:</label>
+                        <select id="group-by-select">
+                            <option value="day" selected>Ngày</option>
+                            <option value="month">Tháng</option>
+                            <option value="year">Năm</option>
+                        </select>
+                    </div>
+                    <div class="filter-option">
+                        <label for="from-date-input">Từ ngày:</label>
+                        <input type="date" id="from-date-input">
+                    </div>
+                    <div class="filter-option">
+                        <label for="to-date-input">Đến ngày:</label>
+                        <input type="date" id="to-date-input">
+                    </div>
+                    <button id="view-stats-btn" class="view-btn">Xem thống kê</button>
+                </div>
+            </div>
+            <div id="revenue-manager-message" class="message-area" style="text-align:center; margin-bottom:15px;"></div>
+
+            <table class="order-table"> <thead>
+            <tr>
+                <th id="period-header">Thời kỳ</th>
+                <th>Số lượng đơn hàng (Đã giao)</th>
+                <th>Số sản phẩm bán</th>
+                <th>Tổng doanh thu (Đã giao)</th>
+            </tr>
+            </thead>
+                <tbody id="revenue-table-body">
+                </tbody>
+            </table>
+
+            <div class="pagination" id="pagination-controls">
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="assets/js/revenue-manage.js"></script> </body>
+</html>

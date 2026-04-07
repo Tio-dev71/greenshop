@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm</title>
+    <link rel="stylesheet" href="assets/css/Product-Manage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Style cho khu vực filters */
+        .filters-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filters-container > div {
+            display: flex;
+            align-items: center;
+        }
+        .filters-container label {
+            margin-right: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .filters-container select {
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<script>
+    // Script bảo vệ trang admin giữ nguyên
+    (function protectAdminPage() {
+        const token = localStorage.getItem('authToken');
+        const authUserString = localStorage.getItem('authUser');
+        let isAdmin = false;
+        if (token && authUserString) {
+            try {
+                const authUser = JSON.parse(authUserString);
+                if (authUser && authUser.Role === 1) {
+                    isAdmin = true;
+                }
+            } catch (e) { console.error("Error parsing authUser for admin check", e); }
+        }
+        if (!isAdmin) {
+            console.log('Access to admin page denied. Redirecting to login.');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = 'Login.html';
+        } else {
+            console.log('Admin access granted.');
+        }
+    })();
+</script>
+<div class="container">
+    <aside class="sidebar">
+        <a href="Homepage.html" class="logo"> <img src="assets/img/logo.png" alt="GreenFood Logo"></a>
+        <nav>
+            <ul>
+                <li class="menu-item">
+                    <a href="Product-Manage.html" class="QLSP">Quản lý sản phẩm</a> <img src="assets/img/red-stick.png" alt="Stick" class="stick">
+                </li>
+                <li><a href="User-Manage.html" class="QLTK">Quản lý tài khoản</a></li>
+                <li><a href="Order-Manage.html" class="QLDH">Quản lý đơn hàng</a></li>
+                <li><a href="Revenue-Manage.html" class="QLDT">Quản lý doanh thu</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a class="logout" id="admin-logout-button" href="#">Đăng xuất</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="header">
+            <div class="left-header">QUẢN LÝ SẢN PHẨM</div>
+            <div class="right-header">
+                <span id="admin-name-display" style="margin-right: 10px;"></span>
+                <div class="avatar"><img src="assets/img/Admin-avatar.png" alt="Avatar"></div>
+            </div>
+        </header>
+        <div class="main-content">
+            <div class="search-add">
+                <input type="text" id="product-search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button class="add-new" id="add-new-product-btn">Thêm mới</button>
+            </div>
+
+            <div class="filters-container">
+                <div>
+                    <label for="product-category-filter">Danh mục:</label>
+                    <select id="product-category-filter">
+                        <option value="">Tất cả</option>
+                        <option value="Rau củ">Rau củ</option>
+                        <option value="Hải sản">Hải sản</option>
+                        <option value="Thịt tươi">Thịt tươi</option>
+                        <option value="Trái cây">Trái cây</option>
+                        <option value="Đồ khô">Đồ khô</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="product-sort-by">Sắp xếp theo:</label>
+                    <select id="product-sort-by">
+                        <option value="ProductID">ID Sản phẩm</option>
+                        <option value="ProductName">Tên sản phẩm</option>
+                        <option value="Price">Giá</option>
+                        <option value="Quantity">Số lượng</option>
+                        <option value="Category">Danh mục</option>
+                        <option value="Discount">Giảm giá</option>
+                        <option value="created_at">Ngày tạo</option>
+                        <option value="updated_at">Ngày cập nhật</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="product-sort-direction">Thứ tự:</label>
+                    <select id="product-sort-direction">
+                        <option value="desc">Giảm dần (Mới nhất/Lớn nhất)</option>
+                        <option value="asc">Tăng dần (Cũ nhất/Nhỏ nhất)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="product-table">
+                    <thead class="thead">
+                    <tr>
+                        <th>ID</th>
+                        <th>Sản phẩm</th>
+                        <th>Giá niêm yết</th>
+                        <th>Giảm giá</th>
+                        <th>Số lượng</th>
+                        <th>Danh mục</th>
+                        <th>Ảnh</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination-controls">
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="them-moi" id="product-form-modal">
+    <form class="form" id="addProductForm" enctype="multipart/form-data">
+        <h2 id="form-title">Thêm Sản Phẩm Mới</h2>
+        <input type="hidden" id="productId">
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="productName">Tên sản phẩm</label>
+                <input type="text" id="productName" name="ProductName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="productCategory">Danh mục</label>
+                <select id="productCategory" name="Category" class="form-control" required>
+                    <option value="">Chọn danh mục</option>
+                    <option value="Rau củ">Rau củ</option>
+                    <option value="Hải sản">Hải sản</option>
+                    <option value="Thịt tươi">Thịt tươi</option>
+                    <option value="Trái cây">Trái cây</option>
+                    <option value="Đồ khô">Đồ khô</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="productPrice">Giá niêm yết (VNĐ)</label>
+                <input type="number" id="productPrice" name="Price" class="form-control" min="0" step="any" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="productDiscount">Giảm giá (%)</label>
+                <input type="number" id="productDiscount" name="DiscountPercent" class="form-control" min="0" max="100" step="any" value="0">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="productQuantity">Số lượng</label>
+                <input type="number" id="productQuantity" name="Quantity" class="form-control" min="0" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="productImageFile">Ảnh sản phẩm</label>
+                <input type="file" id="productImageFile" name="ImageFile" class="form-control">
+                <img id="imagePreview" src="#" alt="Xem trước ảnh" style="max-width: 100px; max-height: 100px; margin-top: 10px; display: none;"/>
+            </div>
+        </div>
+        <div class="form-group full-width">
+            <label class="form-label" for="productDescription">Mô tả</label>
+            <textarea id="productDescription" name="Description" class="form-control textarea" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="form-submit" id="save-product-button">Lưu</button>
+            <button type="button" class="form-cancel" id="cancel-product-form">Hủy</button>
+        </div>
+    </form>
+</div>
+
+<script src="assets/js/Product-Manage.js"></script>
+</body>
+</html>

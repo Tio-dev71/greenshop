@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenFood - Danh sách sản phẩm</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/Product-list.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="page-shell product-list-page">
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="Homepage.html" class="brand">
+            <img src="assets/img/logo.png" alt="Logo">
+            <div class="brand-text">
+                <strong>GreenFood</strong>
+                <span>Chọn nhanh món ăn tươi cho hôm nay</span>
+            </div>
+        </a>
+        <div class="icon-links icons">
+            <a href="Cart.html"><i class="fas fa-shopping-cart"></i></a>
+            <a href="Order-history.html"><i class="fas fa-sync-alt"></i></a>
+            <a href="Notification.html"><i class="fas fa-bell"></i></a>
+            <a href="User-info.html"><i class="fas fa-user"></i></a>
+            <a href="Homepage.html"><i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="catalog-hero">
+        <div class="container catalog-hero-inner card">
+            <div>
+                <span class="eyebrow">Danh mục sản phẩm</span>
+                <h1>Tìm món phù hợp chỉ trong vài giây</h1>
+                <p>Đa dạng nguồn hàng.</p>
+            </div>
+            <div class="catalog-hero-badges">
+                <span>🥦 Rau củ</span>
+                <span>🍎 Trái cây</span>
+                <span>🥩 Thịt tươi</span>
+                <span>🦐 Hải sản</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="container catalog-layout">
+        <aside>
+            <div class="filter-group keywords-group card">
+                <label class="filter-group-title">Tìm kiếm nhanh</label>
+                <div class="search-container">
+                    <input type="text" id="search-keyword-input" placeholder="Nhập tên sản phẩm..." class="search-input">
+                    <button id="search-button" class="search-button">Tìm</button>
+                </div>
+            </div>
+
+            <div class="filter-group category-filter-group card">
+                <label class="filter-group-title">Lọc theo danh mục</label>
+                <div class="filters" id="category-filters">
+                    <label><input type="radio" name="category" value="" checked> Tất cả</label>
+                    <label><input type="radio" name="category" value="Rau củ"> Rau củ</label>
+                    <label><input type="radio" name="category" value="Thịt tươi"> Thịt tươi</label>
+                    <label><input type="radio" name="category" value="Hải sản"> Hải sản</label>
+                    <label><input type="radio" name="category" value="Trái cây"> Trái cây</label>
+                    <label><input type="radio" name="category" value="Đồ khô"> Đồ khô</label>
+                </div>
+            </div>
+
+            <div class="filter-group sort-filter-group card">
+                <label for="sort-options" class="filter-group-title">Sắp xếp theo</label>
+                <select id="sort-options" class="filter-select">
+                    <option value="ProductID_desc">Mặc định</option>
+                    <option value="Price_asc">Giá tăng dần</option>
+                    <option value="Price_desc">Giá giảm dần</option>
+                    <option value="ProductName_asc">Tên A-Z</option>
+                    <option value="ProductName_desc">Tên Z-A</option>
+                </select>
+            </div>
+        </aside>
+
+        <section class="products">
+            <div class="products-toolbar">
+                <div>
+                    <h2>Sản phẩm nổi bật</h2>
+                    <p>Mỗi card được làm thoáng hơn để dễ nhìn trên cả desktop và mobile.</p>
+                </div>
+            </div>
+
+            <div class="product-grid" id="product-grid-container"></div>
+            <div class="pagination" id="pagination-controls-container"></div>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-copy">
+            <strong>Công ty thực phẩm GreenFood</strong>
+            <span>Danh sách sản phẩm được tinh gọn, sáng và dễ lọc hơn.</span>
+        </div>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const API_PUBLIC_PRODUCTS_URL = `${window.location.origin}/api/products`;
+        const productGridContainer = document.getElementById("product-grid-container");
+        const paginationControlsContainer = document.getElementById("pagination-controls-container");
+        const searchKeywordInput = document.getElementById("search-keyword-input");
+        const searchButton = document.getElementById("search-button");
+        const categoryFilters = document.getElementById("category-filters");
+        const sortOptions = document.getElementById("sort-options");
+
+        let currentPage = 1;
+        let currentKeyword = '';
+        let currentCategory = '';
+        let currentSortBy = 'ProductID';
+        let currentSortDirection = 'desc';
+
+        async function fetchAndRenderProducts() {
+            const params = new URLSearchParams({
+                page: currentPage,
+                keyword: currentKeyword,
+                category: currentCategory,
+                sort_by: currentSortBy,
+                sort_direction: currentSortDirection,
+                per_page: 12
+            });
+
+            try {
+                const response = await fetch(`${API_PUBLIC_PRODUCTS_URL}?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.data) {
+                    renderProducts(result.data.data);
+                    renderPagination(result.data);
+                } else {
+                    console.error("Failed to fetch products:", result.message || "Unknown error");
+                    productGridContainer.innerHTML = `<p class="empty-state" style="text-align:center; width:100%;">Không tải được dữ liệu sản phẩm.</p>`;
+                }
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                productGridContainer.innerHTML = `<p class="empty-state" style="text-align:center; width:100%;">Lỗi khi tải dữ liệu: ${error.message}</p>`;
+            }
+        }
+
+        function renderProducts(products) {
+            productGridContainer.innerHTML = "";
+            if (products.length === 0) {
+                productGridContainer.innerHTML = `<p class="empty-state" style="text-align:center; width:100%;">Không có sản phẩm nào phù hợp.</p>`;
+                return;
+            }
+            products.forEach(product => {
+                const productItemLink = document.createElement("a");
+                productItemLink.href = `Product-detail.html?id=${product.ProductID}`;
+                productItemLink.classList.add('product-link-card');
+
+                const productItemDiv = document.createElement("div");
+                productItemDiv.classList.add("product-item");
+
+                const imageUrl = product.Image ? (product.Image.startsWith('http') ? product.Image : `${window.location.origin}/storage/${product.Image}`) : 'assets/img/placeholder.png';
+
+                let priceHTML = `${Number(product.Price).toLocaleString('vi-VN')}₫`;
+                if (product.Discount && parseFloat(product.Discount) > 0) {
+                    let discountedPrice;
+                    if (typeof product.discounted_price !== 'undefined') {
+                        discountedPrice = product.discounted_price;
+                    } else {
+                        discountedPrice = parseFloat(product.Price) * (1 - parseFloat(product.Discount));
+                    }
+                    priceHTML = `
+                    <span class="old-price">${Number(product.Price).toLocaleString('vi-VN')}₫</span>
+                    <span class="new-price">${Number(discountedPrice).toLocaleString('vi-VN')}₫</span>
+                `;
+                }
+
+                productItemDiv.innerHTML = `
+                    <div class="product-thumb"><img src="${imageUrl}" alt="${product.ProductName || 'Ảnh sản phẩm'}"></div>
+                    <div class="product-meta">
+                        <div class="product-category">Sản phẩm sạch</div>
+                        <div class="product-name">${product.ProductName || 'N/A'}</div>
+                        <div class="product-price">${priceHTML}</div>
+                    </div>
+                `;
+                productItemLink.appendChild(productItemDiv);
+                productGridContainer.appendChild(productItemLink);
+            });
+        }
+
+        function renderPagination(paginationData) {
+            paginationControlsContainer.innerHTML = "";
+            if (!paginationData || !paginationData.links || paginationData.last_page <= 1) {
+                return;
+            }
+
+            paginationData.links.forEach(link => {
+                const pageButton = document.createElement("button");
+                pageButton.innerHTML = link.label;
+                pageButton.disabled = !link.url;
+                if (link.active) {
+                    pageButton.classList.add("active");
+                }
+
+                pageButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    if (link.url) {
+                        const urlParams = new URL(link.url).searchParams;
+                        currentPage = parseInt(urlParams.get('page')) || 1;
+                        fetchAndRenderProducts();
+                    }
+                });
+                paginationControlsContainer.appendChild(pageButton);
+            });
+        }
+
+        if (searchButton && searchKeywordInput) {
+            searchButton.addEventListener("click", () => {
+                currentKeyword = searchKeywordInput.value.trim();
+                currentPage = 1;
+                fetchAndRenderProducts();
+            });
+            searchKeywordInput.addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    searchButton.click();
+                }
+            });
+        }
+
+        if (categoryFilters) {
+            categoryFilters.querySelectorAll('input[name="category"]').forEach(radio => {
+                radio.addEventListener("change", (event) => {
+                    currentCategory = event.target.value;
+                    currentPage = 1;
+                    fetchAndRenderProducts();
+                });
+            });
+        }
+
+        if (sortOptions) {
+            sortOptions.addEventListener("change", (event) => {
+                const [sortBy, sortDirection] = event.target.value.split('_');
+                currentSortBy = sortBy || 'ProductID';
+                currentSortDirection = sortDirection || 'desc';
+                currentPage = 1;
+                fetchAndRenderProducts();
+            });
+        }
+
+        fetchAndRenderProducts();
+    });
+</script>
+</body>
+</html>

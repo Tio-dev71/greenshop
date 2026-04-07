@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin tài khoản | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/User-info.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS cho Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 25px 30px;
+            border: 1px solid #ddd;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            animation: fadeInModal 0.3s ease-out;
+        }
+        #manageAddressesModal .modal-content { /* Modal sổ địa chỉ có thể rộng hơn */
+            max-width: 650px;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+        }
+        .close-btn {
+            color: #aaa;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 5px;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #333;
+            text-decoration: none;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 15px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="date"],
+        .form-group input[type="password"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #28a745;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        .form-actions {
+            text-align: right;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .form-actions button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            margin-left: 10px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .form-actions .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
+        .form-actions .btn-primary:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .form-actions .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .form-actions .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        .message-area {
+            text-align: center;
+            padding: 8px;
+            margin-top: 10px;
+            margin-bottom: 0px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            min-height: 20px;
+        }
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        #address-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        .address-item {
+            padding: 12px 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .address-item div:first-child {
+            flex-grow: 1;
+        }
+        .address-item p {
+            margin: 4px 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        .address-item p strong {
+            color: #333;
+        }
+        .address-actions button {
+            font-size: 0.9em;
+            padding: 6px 10px;
+            margin-left: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+            transition: opacity 0.2s ease;
+        }
+        .address-actions button:hover {
+            opacity: 0.8;
+        }
+        .btn-edit-address { background-color: #ffc107; color: #212529; }
+        .btn-delete-address { background-color: #dc3545; color: white; }
+        #showAddAddressFormBtn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+        #showAddAddressFormBtn:hover {
+            background-color: #218838;
+        }
+        #addressFormContainer {
+            background-color: #fdfdfd;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px dashed #ddd;
+        }
+        #addressFormContainer h3 {
+            font-size: 18px;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a>
+    </div>
+    <div class="icons">
+        <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+        <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+        <i class="fas fa-bell"></i>
+        <a href="User-info.html" title="Thông tin tài khoản"><i class="fas fa-user"></i></a>
+        <i class="fas fa-arrow-right" id="logout-icon-userinfo" title="Đăng xuất"></i>
+    </div>
+</header>
+
+<main>
+    <section class="user-info-container">
+        <h1>THÔNG TIN TÀI KHOẢN</h1>
+
+        <table class="user-info-table">
+            <thead>
+            <tr>
+                <th class="info-label">Thông tin cá nhân</th>
+                <th>Chi tiết</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="info-label">Họ và Tên</td>
+                <td id="user-name" class="data-value">Đang tải...</td>
+            </tr>
+            <tr>
+                <td class="info-label">Email</td>
+                <td id="user-email" class="data-value">Đang tải...</td>
+            </tr>
+            <tr>
+                <td class="info-label">Số điện thoại</td>
+                <td id="user-phone" class="data-value">Đang tải...</td>
+            </tr>
+            <tr>
+                <td class="info-label">Ngày sinh</td>
+                <td id="user-dob" class="data-value">Đang tải...</td>
+            </tr>
+            </tbody>
+        </table>
+        <div id="general-message" class="message-area" style="margin-bottom: 15px;"></div>
+
+        <div class="action-buttons-container">
+            <button id="update-info-button">Cập nhật thông tin cá nhân</button>
+            <button id="change-password-button">Đổi mật khẩu</button>
+            <button id="manage-addresses-button">Sổ địa chỉ</button>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name">Công ty thực phẩm GreenFood</p>
+        <p class="web-author">75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<div id="updateInfoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Cập nhật thông tin cá nhân</h2>
+            <span class="close-btn" id="closeUpdateInfoModal">&times;</span>
+        </div>
+        <form id="updateInfoForm">
+            <div class="form-group">
+                <label for="updateName">Họ và Tên:</label>
+                <input type="text" id="updateName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="updatePhone">Số điện thoại:</label>
+                <input type="tel" id="updatePhone" name="PhoneNumber">
+            </div>
+            <div class="form-group">
+                <label for="updateDob">Ngày sinh:</label>
+                <input type="date" id="updateDob" name="DateOfBirth">
+            </div>
+            <div id="updateInfoMessage" class="message-area"></div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelUpdateInfo">Hủy</button>
+                <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Đổi mật khẩu</h2>
+            <span class="close-btn" id="closeChangePasswordModal">&times;</span>
+        </div>
+        <form id="changePasswordForm">
+            <div class="form-group">
+                <label for="currentPassword">Mật khẩu hiện tại:</label>
+                <input type="password" id="currentPassword" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Mật khẩu mới:</label>
+                <input type="password" id="newPassword" name="new_password" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Xác nhận mật khẩu mới:</label>
+                <input type="password" id="confirmNewPassword" name="new_password_confirmation" required minlength="6">
+            </div>
+            <div id="changePasswordMessage" class="message-area"></div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelChangePassword">Hủy</button>
+                <button type="submit" class="btn-primary">Đổi mật khẩu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="manageAddressesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Sổ địa chỉ</h2>
+            <span class="close-btn" id="closeManageAddressesModal">&times;</span>
+        </div>
+
+        <div id="address-list-container">
+            <p>Đang tải danh sách địa chỉ...</p>
+        </div>
+        <button id="showAddAddressFormBtn" class="btn-primary" style="margin-bottom:15px; padding: 10px 15px;">Thêm địa chỉ mới</button>
+
+        <div id="addressFormContainer" style="display:none; border-top: 1px solid #eee; padding-top:15px;">
+            <h3 id="addressFormTitle">Thêm địa chỉ mới</h3>
+            <form id="addressForm">
+                <input type="hidden" id="addressId" name="address_id">
+                <div class="form-group">
+                    <label for="customerName">Tên người nhận:</label>
+                    <input type="text" id="customerName" name="CustomerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="addressPhoneNumber">Số điện thoại người nhận:</label>
+                    <input type="tel" id="addressPhoneNumber" name="PhoneNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Địa chỉ cụ thể (Số nhà, tên đường):</label>
+                    <input type="text" id="street" name="Street" required>
+                </div>
+                <div class="form-group">
+                    <label for="ward">Phường/Xã:</label>
+                    <input type="text" id="ward" name="Ward" required>
+                </div>
+                <div class="form-group">
+                    <label for="district">Quận/Huyện:</label>
+                    <input type="text" id="district" name="District" required>
+                </div>
+                <div id="addressFormMessage" class="message-area"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelAddressForm">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu địa chỉ</button>
+                </div>
+            </form>
+        </div>
+        <div id="manageAddressesMessage" class="message-area" style="margin-top:15px;"></div>
+    </div>
+</div>
+
+
+<script>
+    // API Base URL - Ensure this is correct for your environment
+    const API_BASE_URL_USERINFO = window.location.origin;
+
+    // --- Authentication Helper Functions ---
+    function getAuthToken_UserInfo() {
+        return localStorage.getItem('authToken');
+    }
+
+    function getAuthHeaders_UserInfo(isFormData = false) {
+        const token = getAuthToken_UserInfo();
+        const headers = {
+            'Accept': 'application/json'
+        };
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    }
+
+    function getAuthUser_UserInfo() {
+        const userString = localStorage.getItem('authUser');
+        if (userString) {
+            try {
+                return JSON.parse(userString);
+            } catch (e) {
+                console.error("Error parsing authUser from localStorage", e);
+                localStorage.removeItem('authUser'); // Clear invalid data
+                return null;
+            }
+        }
+        return null;
+    }
+
+    async function logoutUser_UserInfo() {
+        const token = getAuthToken_UserInfo();
+        if (token) {
+            try {
+                // Optional: Don't wait for server response to speed up client-side logout
+                fetch(`${API_BASE_URL_USERINFO}/api/logout`, {
+                    method: 'POST',
+                    headers: getAuthHeaders_UserInfo()
+                }).catch(err => console.error('Silent logout API call failed:', err));
+            } catch (error) {
+                // This catch might not be hit due to the nature of the async fetch call above
+                console.error('Error initiating server logout API call:', error);
+            }
+        }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        console.log('Token and user info removed from localStorage. Redirecting to login.');
+        window.location.href = 'Login.html';
+    }
+
+    // --- DOMContentLoaded: Main script execution ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Element Selectors ---
+        const userNameEl = document.getElementById('user-name');
+        const userEmailEl = document.getElementById('user-email');
+        const userPhoneEl = document.getElementById('user-phone');
+        const userDobEl = document.getElementById('user-dob');
+        const logoutIcon = document.getElementById('logout-icon-userinfo');
+        const generalMessageEl = document.getElementById('general-message');
+
+        const updateInfoModal = document.getElementById('updateInfoModal');
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        const manageAddressesModal = document.getElementById('manageAddressesModal');
+
+        const updateInfoButton = document.getElementById('update-info-button');
+        const changePasswordButton = document.getElementById('change-password-button');
+        const manageAddressesButton = document.getElementById('manage-addresses-button');
+
+        const closeUpdateInfoModalBtn = document.getElementById('closeUpdateInfoModal');
+        const closeChangePasswordModalBtn = document.getElementById('closeChangePasswordModal');
+        const closeManageAddressesModalBtn = document.getElementById('closeManageAddressesModal');
+
+        const cancelUpdateInfoBtn = document.getElementById('cancelUpdateInfo');
+        const cancelChangePasswordBtn = document.getElementById('cancelChangePassword');
+        const cancelAddressFormBtn = document.getElementById('cancelAddressForm');
+
+        const updateInfoForm = document.getElementById('updateInfoForm');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        const addressForm = document.getElementById('addressForm');
+        const addressFormContainer = document.getElementById('addressFormContainer');
+        const showAddAddressFormBtn = document.getElementById('showAddAddressFormBtn');
+        const addressListContainer = document.getElementById('address-list-container');
+        const addressFormTitle = document.getElementById('addressFormTitle');
+
+        const updateInfoMessageEl = document.getElementById('updateInfoMessage');
+        const changePasswordMessageEl = document.getElementById('changePasswordMessage');
+        const addressFormMessageEl = document.getElementById('addressFormMessage');
+        const manageAddressesMessageEl = document.getElementById('manageAddressesMessage');
+
+        let currentUserData = null; // To store current user details
+
+        // --- Utility Functions ---
+        function displayMessage(element, message, isError = true) {
+            if (element) {
+                element.textContent = message;
+                element.className = 'message-area ' + (isError ? 'error-message' : 'success-message');
+            }
+        }
+
+        function clearMessage(element) {
+            if (element) {
+                element.textContent = '';
+                element.className = 'message-area'; // Reset class
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Chưa cập nhật';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (e) {
+                console.error("Error formatting date for display:", e);
+                return 'Ngày không hợp lệ';
+            }
+        }
+
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`; // Format YYYY-MM-DD for <input type="date">
+            } catch (e) {
+                console.error("Error formatting date for input:", e);
+                return '';
+            }
+        }
+
+        function displayUserInfo(user) {
+            currentUserData = user; // Store for pre-filling forms
+            if (userNameEl) userNameEl.textContent = user.name || 'Chưa cập nhật';
+            if (userEmailEl) userEmailEl.textContent = user.email || 'Chưa cập nhật';
+            if (userPhoneEl) {
+                userPhoneEl.textContent = user.PhoneNumber || 'Chưa cập nhật';
+                user.PhoneNumber ? userPhoneEl.classList.remove('empty') : userPhoneEl.classList.add('empty');
+            }
+            if (userDobEl) {
+                userDobEl.textContent = formatDate(user.DateOfBirth);
+                user.DateOfBirth ? userDobEl.classList.remove('empty') : userDobEl.classList.add('empty');
+            }
+        }
+
+        // --- Initial User Data Fetch and Verification ---
+        async function fetchAndVerifyCurrentUser() {
+            const token = getAuthToken_UserInfo();
+            if (!token) { // Double check token existence before fetch
+                console.log('No auth token found on page load, redirecting to login.');
+                logoutUser_UserInfo(); // This will redirect
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL_USERINFO}/api/user`, {
+                    method: 'GET',
+                    headers: getAuthHeaders_UserInfo()
+                });
+
+                if (response.ok) {
+                    const serverUser = await response.json();
+                    localStorage.setItem('authUser', JSON.stringify(serverUser));
+                    displayUserInfo(serverUser);
+                } else if (response.status === 401) {
+                    console.error('User-info.html: Token is invalid or expired during fetchAndVerify. Logging out.');
+                    logoutUser_UserInfo();
+                } else {
+                    const errorText = await response.text();
+                    console.error('User-info.html: Failed to fetch user info from server:', response.status, errorText);
+                    if (!getAuthUser_UserInfo() && userNameEl) { // If no local user info either
+                        userNameEl.textContent = "Không thể tải thông tin";
+                        if(userEmailEl) userEmailEl.textContent = "-";
+                        if(userPhoneEl) userPhoneEl.textContent = "-";
+                        if(userDobEl) userDobEl.textContent = "-";
+                    }
+                }
+            } catch (error) {
+                console.error('User-info.html: Error fetching user info:', error);
+                if (!getAuthUser_UserInfo() && userNameEl) {
+                    userNameEl.textContent = "Lỗi kết nối";
+                }
+            }
+        }
+
+        // --- Initial Setup ---
+        const initialToken = getAuthToken_UserInfo();
+        if (!initialToken) {
+            console.log('User-info.html: No auth token found on initial check. Redirecting to login.');
+            window.location.href = 'Login.html'; // Redirect immediately if no token
+            return; // Stop further script execution for this page
+        }
+
+        const localUser = getAuthUser_UserInfo();
+        if (localUser) {
+            displayUserInfo(localUser);
+        }
+        fetchAndVerifyCurrentUser(); // Fetch fresh data and verify token
+
+        // --- Event Listeners ---
+        if (logoutIcon) {
+            logoutIcon.addEventListener('click', function() {
+                if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+                    logoutUser_UserInfo();
+                }
+            });
+        }
+
+        function openModal(modalElement) {
+            if (modalElement) modalElement.style.display = "flex";
+            // Clear previous messages from all modals and general message area
+            [updateInfoMessageEl, changePasswordMessageEl, addressFormMessageEl, manageAddressesMessageEl, generalMessageEl].forEach(clearMessage);
+        }
+        function closeModal(modalElement) {
+            if (modalElement) modalElement.style.display = "none";
+        }
+
+        if(updateInfoButton) {
+            updateInfoButton.addEventListener('click', () => {
+                if (currentUserData) {
+                    updateInfoForm.elements['name'].value = currentUserData.name || '';
+                    updateInfoForm.elements['PhoneNumber'].value = currentUserData.PhoneNumber || '';
+                    updateInfoForm.elements['DateOfBirth'].value = formatDateForInput(currentUserData.DateOfBirth);
+                }
+                openModal(updateInfoModal);
+            });
+        }
+        if(changePasswordButton) {
+            changePasswordButton.addEventListener('click', () => {
+                changePasswordForm.reset();
+                openModal(changePasswordModal);
+            });
+        }
+        if(manageAddressesButton) {
+            manageAddressesButton.addEventListener('click', () => {
+                openModal(manageAddressesModal);
+                loadAddresses();
+                addressFormContainer.style.display = 'none';
+                addressForm.reset();
+                document.getElementById('addressId').value = '';
+                addressFormTitle.textContent = 'Thêm địa chỉ mới';
+            });
+        }
+
+        if(closeUpdateInfoModalBtn) closeUpdateInfoModalBtn.addEventListener('click', () => closeModal(updateInfoModal));
+        if(closeChangePasswordModalBtn) closeChangePasswordModalBtn.addEventListener('click', () => closeModal(changePasswordModal));
+        if(closeManageAddressesModalBtn) closeManageAddressesModalBtn.addEventListener('click', () => closeModal(manageAddressesModal));
+
+        if(cancelUpdateInfoBtn) cancelUpdateInfoBtn.addEventListener('click', () => closeModal(updateInfoModal));
+        if(cancelChangePasswordBtn) cancelChangePasswordBtn.addEventListener('click', () => closeModal(changePasswordModal));
+        if(cancelAddressFormBtn) cancelAddressFormBtn.addEventListener('click', () => {
+            addressFormContainer.style.display = 'none';
+            addressForm.reset();
+            document.getElementById('addressId').value = '';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === updateInfoModal) closeModal(updateInfoModal);
+            if (event.target === changePasswordModal) closeModal(changePasswordModal);
+            if (event.target === manageAddressesModal) closeModal(manageAddressesModal);
+        });
+
+        // --- Form Submission Logic ---
+        if(updateInfoForm) {
+            updateInfoForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessage(updateInfoMessageEl);
+                const payload = {
+                    name: this.elements['name'].value.trim(),
+                    PhoneNumber: this.elements['PhoneNumber'].value.trim() || null, // Send null if empty
+                    DateOfBirth: this.elements['DateOfBirth'].value || null,      // Send null if empty
+                };
+                // Remove null fields from payload if not desired by backend for optional fields
+                Object.keys(payload).forEach(key => (payload[key] === null || payload[key] === '') && delete payload[key]);
+
+
+                try {
+                    const response = await fetch(`${API_BASE_URL_USERINFO}/api/user/profile`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders_UserInfo(),
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        displayMessage(updateInfoMessageEl, 'Cập nhật thông tin thành công!', false);
+                        localStorage.setItem('authUser', JSON.stringify(result.data));
+                        displayUserInfo(result.data);
+                        setTimeout(() => {
+                            closeModal(updateInfoModal);
+                            displayMessage(generalMessageEl, 'Thông tin cá nhân đã được cập nhật!', false);
+                        }, 1500);
+                    } else {
+                        let errorMsg = result.message || 'Cập nhật thất bại.';
+                        if (result.errors) {
+                            errorMsg += Object.values(result.errors).map(e => `\n- ${e.join(', ')}`).join('');
+                        }
+                        displayMessage(updateInfoMessageEl, errorMsg, true);
+                    }
+                } catch (error) {
+                    displayMessage(updateInfoMessageEl, 'Lỗi kết nối: ' + error.message, true);
+                }
+            });
+        }
+
+        if(changePasswordForm) {
+            changePasswordForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessage(changePasswordMessageEl);
+                const payload = {
+                    current_password: this.elements['current_password'].value,
+                    new_password: this.elements['new_password'].value,
+                    new_password_confirmation: this.elements['confirmNewPassword'].value,
+                };
+                try {
+                    const response = await fetch(`${API_BASE_URL_USERINFO}/api/user/password`, {
+                        method: 'POST',
+                        headers: getAuthHeaders_UserInfo(),
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        displayMessage(changePasswordMessageEl, 'Đổi mật khẩu thành công!', false);
+                        this.reset();
+                        setTimeout(() => {
+                            closeModal(changePasswordModal);
+                            displayMessage(generalMessageEl, 'Mật khẩu của bạn đã được thay đổi! Vui lòng đăng nhập lại nếu được yêu cầu.', false);
+                            // Consider forcing logout or token refresh for security after password change
+                        }, 1500);
+                    } else {
+                        let errorMsg = result.message || 'Đổi mật khẩu thất bại.';
+                        if (result.errors) {
+                            errorMsg += Object.values(result.errors).map(e => `\n- ${e.join(', ')}`).join('');
+                        }
+                        displayMessage(changePasswordMessageEl, errorMsg, true);
+                    }
+                } catch (error) {
+                    displayMessage(changePasswordMessageEl, 'Lỗi kết nối: ' + error.message, true);
+                }
+            });
+        }
+
+        // --- Address Management Logic ---
+        if(showAddAddressFormBtn) {
+            showAddAddressFormBtn.addEventListener('click', () => {
+                addressForm.reset();
+                document.getElementById('addressId').value = '';
+                addressFormTitle.textContent = 'Thêm địa chỉ mới';
+                addressFormContainer.style.display = 'block';
+                clearMessage(addressFormMessageEl);
+            });
+        }
+
+        async function loadAddresses() {
+            if (!addressListContainer) return;
+            addressListContainer.innerHTML = '<p>Đang tải...</p>';
+            try {
+                const response = await fetch(`${API_BASE_URL_USERINFO}/api/user/addresses`, {
+                    headers: getAuthHeaders_UserInfo()
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    renderAddresses(result.data);
+                } else {
+                    displayMessage(manageAddressesMessageEl, result.message || 'Không thể tải danh sách địa chỉ.', true);
+                    addressListContainer.innerHTML = ''; // Clear "Đang tải..."
+                }
+            } catch (error) {
+                displayMessage(manageAddressesMessageEl, 'Lỗi kết nối khi tải địa chỉ: ' + error.message, true);
+                addressListContainer.innerHTML = '';
+            }
+        }
+
+        function renderAddresses(addresses) {
+            if (!addressListContainer) return;
+            if (!addresses || addresses.length === 0) {
+                addressListContainer.innerHTML = '<p>Bạn chưa có địa chỉ nào.</p>';
+                return;
+            }
+            addressListContainer.innerHTML = '';
+            addresses.forEach(addr => {
+                const item = document.createElement('div');
+                item.classList.add('address-item');
+                item.innerHTML = `
+                    <div>
+                        <p><strong>${addr.CustomerName}</strong> - ${addr.PhoneNumber}</p>
+                        <p>${addr.Street}, ${addr.Ward}, ${addr.District}</p>
+                    </div>
+                    <div class="address-actions">
+                        <button class="btn-edit-address" data-id="${addr.AddressID}">Sửa</button>
+                        <button class="btn-delete-address" data-id="${addr.AddressID}">Xóa</button>
+                    </div>
+                `;
+                item.querySelector('.btn-edit-address').addEventListener('click', () => populateAddressFormForEdit(addr));
+                item.querySelector('.btn-delete-address').addEventListener('click', () => deleteAddress(addr.AddressID));
+                addressListContainer.appendChild(item);
+            });
+        }
+
+        function populateAddressFormForEdit(address) {
+            addressForm.reset();
+            addressFormTitle.textContent = 'Chỉnh sửa địa chỉ';
+            document.getElementById('addressId').value = address.AddressID;
+            addressForm.elements['CustomerName'].value = address.CustomerName;
+            addressForm.elements['PhoneNumber'].value = address.PhoneNumber;
+            addressForm.elements['Street'].value = address.Street;
+            addressForm.elements['Ward'].value = address.Ward;
+            addressForm.elements['District'].value = address.District;
+            addressFormContainer.style.display = 'block';
+            clearMessage(addressFormMessageEl);
+        }
+
+        if(addressForm) {
+            addressForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessage(addressFormMessageEl);
+                const addressId = document.getElementById('addressId').value;
+                const payload = {
+                    CustomerName: this.elements['CustomerName'].value,
+                    PhoneNumber: this.elements['PhoneNumber'].value,
+                    Street: this.elements['Street'].value,
+                    Ward: this.elements['Ward'].value,
+                    District: this.elements['District'].value,
+                };
+
+                const method = addressId ? 'PUT' : 'POST';
+                const url = addressId ? `${API_BASE_URL_USERINFO}/api/user/addresses/${addressId}` : `${API_BASE_URL_USERINFO}/api/user/addresses`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: getAuthHeaders_UserInfo(),
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        displayMessage(addressFormMessageEl, `Địa chỉ đã được ${addressId ? 'cập nhật' : 'thêm mới'}!`, false);
+                        loadAddresses();
+                        this.reset();
+                        document.getElementById('addressId').value = '';
+                        setTimeout(() => { addressFormContainer.style.display = 'none'; clearMessage(addressFormMessageEl); }, 1500);
+                    } else {
+                        let errorMsg = result.message || (addressId ? 'Cập nhật' : 'Thêm mới') + ' địa chỉ thất bại.';
+                        if (result.errors) {
+                            errorMsg += Object.values(result.errors).map(e => `\n- ${e.join(', ')}`).join('');
+                        }
+                        displayMessage(addressFormMessageEl, errorMsg, true);
+                    }
+                } catch (error) {
+                    displayMessage(addressFormMessageEl, 'Lỗi kết nối: ' + error.message, true);
+                }
+            });
+        }
+
+        async function deleteAddress(addressId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return;
+            clearMessage(manageAddressesMessageEl);
+            try {
+                const response = await fetch(`${API_BASE_URL_USERINFO}/api/user/addresses/${addressId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders_UserInfo()
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    displayMessage(manageAddressesMessageEl, 'Xóa địa chỉ thành công!', false);
+                    loadAddresses();
+                } else {
+                    displayMessage(manageAddressesMessageEl, result.message || 'Xóa địa chỉ thất bại.', true);
+                }
+            } catch (error) {
+                displayMessage(manageAddressesMessageEl, 'Lỗi kết nối: ' + error.message, true);
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+/* User-info.css */
+
+/* @import "Product-list.css"; Giữ lại nếu bạn có import file CSS khác và nó không xung đột */
+/* Nếu Product-list.css cũng định nghĩa header/footer, bạn cần cẩn thận */
+
+/* Style chung cho body nếu cần */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa; /* Màu nền nhẹ cho toàn trang */
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ===== HEADER STYLES (GIỐNG HOMEPAGE) ===== */
+header {
+    background-color: #CDF96E; /* Từ Homepage.css */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Từ Homepage.css */
+}
+
+header .logo img { /* Sử dụng class .logo từ HTML */
+    height: 80px; /* Từ Homepage.css */
+    width: 80px;  /* Từ Homepage.css */
+    margin-top: 10px; /* Từ Homepage.css */
+    margin-left: 10px; /* Từ Homepage.css */
+    /* max-height: 80px; Có thể dùng max-height nếu muốn giới hạn chiều cao tối đa */
+}
+
+header .icons i { /* Áp dụng cho tất cả icons trong header */
+    margin-left: 20px; /* Từ Homepage.css */
+    font-size: 1.5em; /* Từ Homepage.css */
+    color: #333; /* Từ Homepage.css */
+    cursor: pointer;
+}
+header .icons i:hover {
+    color: #4CAF50; /* Từ Homepage.css */
+}
+/* Style riêng cho icon logout nếu cần ghi đè màu hover mặc định */
+header .icons i.fa-arrow-right:hover {
+    color: #d32f2f !important; /* Màu đỏ cho logout khi hover */
+}
+/* ===== KẾT THÚC HEADER STYLES ===== */
+
+
+main {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.user-info-container {
+    padding: 30px;
+    background-color: #fff;
+    margin: 20px 0;
+    max-width: 700px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.user-info-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #343a40;
+    font-size: 28px;
+}
+
+.user-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.user-info-table th,
+.user-info-table td {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.user-info-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.user-info-table td.info-label {
+    font-weight: 600;
+    width: 35%;
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.data-value.empty {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.action-buttons-container {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.action-buttons-container button {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    background-color: #28a745;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    min-width: 280px;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-buttons-container button:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.action-buttons-container button:active {
+    transform: translateY(0px);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.modal {
+    display: none; /* Ẩn mặc định */
+    position: fixed; /* Fixed position để phủ toàn màn hình */
+    z-index: 1000; /* Nằm trên các element khác */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Cho phép scroll nếu nội dung modal dài */
+    background-color: rgba(0,0,0,0.6); /* Nền mờ */
+    align-items: center; /* Căn giữa modal theo chiều dọc (nếu modal con dùng margin auto) */
+    justify-content: center; /* Căn giữa modal theo chiều ngang */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: auto; /* Căn giữa modal, hoặc dùng 10% auto như trước */
+    padding: 25px 30px; /* Tăng padding ngang */
+    border: 1px solid #ddd;
+    width: 90%;
+    max-width: 550px; /* Giới hạn chiều rộng tối đa cho modal thông tin và mật khẩu */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    position: relative; /* Cho phép định vị nút close */
+    animation: fadeInModal 0.3s ease-out; /* Animation khi mở */
+}
+
+/* Modal cho sổ địa chỉ có thể rộng hơn */
+#manageAddressesModal .modal-content {
+    max-width: 650px;
+}
+
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 22px; /* Kích thước tiêu đề modal */
+    color: #333;
+    font-weight: 600;
+}
+
+.close-btn {
+    color: #aaa;
+    font-size: 30px; /* Tăng kích thước nút close */
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 5px; /* Thêm padding để dễ click */
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 15px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="password"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #28a745; /* Màu xanh khi focus */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Thêm shadow nhẹ khi focus */
+}
+
+.form-actions {
+    text-align: right;
+    margin-top: 25px;
+    padding-top: 15px; /* Thêm khoảng cách trên cho action buttons */
+    border-top: 1px solid #eee; /* Phân cách nhẹ */
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    margin-left: 10px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.form-actions .btn-primary {
+    background-color: #28a745;
+    color: white;
+}
+
+.form-actions .btn-primary:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.form-actions .btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.form-actions .btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.message-area { /* Chung cho các thông báo lỗi/thành công trong modal */
+    text-align: center;
+    padding: 8px;
+    margin-top: 10px;
+    margin-bottom: 0px;
+    border-radius: 4px;
+    font-size: 0.95em;
+    min-height: 20px; /* Để không bị nhảy layout khi chưa có message */
+}
+.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* Address List specific styles */
+#address-list-container {
+    max-height: 300px; /* Giới hạn chiều cao và cho phép cuộn */
+    overflow-y: auto;
+    margin-bottom: 20px; /* Khoảng cách trước nút "Thêm mới" */
+    padding-right: 10px; /* Chừa không gian cho thanh cuộn */
+}
+
+.address-item {
+    padding: 12px 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    background-color: #f9f9f9;
+    display: flex; /* Sắp xếp nội dung và action */
+    justify-content: space-between;
+    align-items: center;
+}
+.address-item div:first-child { /* Phần thông tin địa chỉ */
+    flex-grow: 1;
+}
+
+.address-item p {
+    margin: 4px 0;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+.address-item p strong {
+    color: #333;
+}
+
+.address-actions button {
+    font-size: 0.9em;
+    padding: 6px 10px;
+    margin-left: 8px; /* Khoảng cách giữa các nút action */
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    transition: opacity 0.2s ease;
+}
+.address-actions button:hover {
+    opacity: 0.8;
+}
+
+.btn-edit-address { background-color: #ffc107; color: #212529; }
+.btn-delete-address { background-color: #dc3545; color: white; }
+
+#showAddAddressFormBtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+#showAddAddressFormBtn:hover {
+    background-color: #218838;
+}
+
+#addressFormContainer {
+    background-color: #fdfdfd;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px dashed #ddd; /* Phân biệt form thêm/sửa */
+}
+
+#addressFormContainer h3 {
+    font-size: 18px;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Thêm vào User-info.css hoặc file CSS của Order-history */
+.modal-body {
+    padding-top: 10px;
+}
+
+.order-products-table img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.order-products-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+.order-products-table tr:last-child td {
+    border-bottom: none;
+}
+
+.product-item-info {
+    display: flex;
+    align-items: center;
+}
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+/* Bạn đã có các class status trong Order-history.html, chúng sẽ được áp dụng */
+
+/* ===== FOOTER STYLES (GIỐNG HOMEPAGE) ===== */
+/* Giả sử Homepage.html có footer được style như sau, nếu khác bạn cần điều chỉnh */
+/* Dựa theo file Homepage.html và User-info.html bạn cung cấp, footer có cấu trúc HTML tương tự */
+footer{
+    width: 100%;
+    height: 145px;
+    background-color: #FFFFFF;
+}
+
+.footer-content{
+    margin-top: 15px;
+    font-family: Arial;
+    text-align: right;
+    margin-right: 40px;
+}
+
+.Company-name{
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.web-author{
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+.social-media{
+    margin-top: 15px;
+}
+
+.youtube-button {
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.instagram-button {
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.X-button{
+    margin-right: 15px;
+    text-decoration: none;
+}

@@ -1,0 +1,8 @@
+
+:root { --text-font: Inter, ui-sans-serif, system-ui, sans-serif; }
+.main { display: block; width: 100%; margin: 0; }
+.heading { font-family: var(--text-font); font-size: 26px; font-weight: 700; }
+.form { font-family: var(--text-font); }
+.form-group { display: flex; position: relative; flex-direction: column; align-items: stretch; }
+.form-message { font-family: var(--text-font); font-size: 13px; color: red; }
+.error { border-color: red !important; }

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử đơn hàng | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/User-info.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS này có thể chuyển vào User-info.css hoặc tạo file order-history.css riêng */
+        .order-history-table th, .order-history-table td {
+            padding: 12px 10px; /* Điều chỉnh padding */
+            text-align: center;
+            vertical-align: middle; /* Căn giữa theo chiều dọc */
+        }
+
+        .order-history-table th {
+            background-color: #f0f0f0;
+            font-weight: 600;
+        }
+
+        .order-history-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-delivered, .status-success { /* Thêm status-delivered */
+            color: #28a745; /* Xanh lá cây */
+            font-weight: bold;
+        }
+        .status-shipped {
+            color: #17a2b8; /* Xanh dương */
+        }
+        .status-processing {
+            color: #ffc107; /* Vàng */
+        }
+        .status-pending {
+            color: #fd7e14; /* Cam */
+        }
+        .status-cancelled, .status-failed { /* Thêm status-failed */
+            color: #dc3545; /* Đỏ */
+            font-weight: bold;
+        }
+        .status-unknown {
+            color: #6c757d; /* Xám */
+        }
+
+        .order-link {
+            color: #007bff; /* Màu link tiêu chuẩn */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .order-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+        .pagination-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination-controls button {
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination-controls button.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .pagination-controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        #order-history-message {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+        #order-history-message.error-message {
+            color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb;
+        }
+        #order-history-message.success-message {
+            color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a> </div>
+    <div class="icons">
+        <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+        <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+        <a href="Notification.html"><i class="fas fa-bell"></i></a>
+        <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+        <i class="fas fa-arrow-right" id="logout-icon-order-history" title="Đăng xuất" style="cursor:pointer;"></i>
+    </div>
+</header>
+
+<main>
+    <section class="user-info-container"> <h1>LỊCH SỬ ĐƠN HÀNG</h1>
+        <div id="order-history-message"></div>
+
+        <table class="user-info-table order-history-table"> <thead>
+        <tr>
+            <th>Mã ĐH</th>
+            <th>Ngày đặt</th>
+            <th>Số lượng SP</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+            <tbody id="order-history-body">
+            </tbody>
+        </table>
+        <div id="pagination-controls" class="pagination-controls">
+        </div>
+        <div id="no-orders-message" style="text-align:center; padding: 20px; display:none;">
+            <p>Bạn chưa có đơn hàng nào.</p>
+            <a href="Product-list.html" class="order-link" style="font-size: 1.1em;">Bắt đầu mua sắm ngay!</a>
+        </div>
+    </section>
+</main>
+
+<div id="orderDetailModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 750px;"> <!- Tăng max-width cho chi tiết đơn hàng ->
+        <div class="modal-header">
+            <h2 id="modal-order-id">Chi tiết Đơn hàng #</h2>
+            <span class="close-btn" id="closeOrderDetailModal">&times;</span>
+        </div>
+        <div id="orderDetailModalBody" class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+            <div class="order-general-info" style="margin-bottom: 20px; padding-bottom:15px; border-bottom: 1px solid #eee;">
+                <p><strong>Ngày đặt:</strong> <span id="modal-order-date"></span></p>
+                <p><strong>Trạng thái:</strong> <span id="modal-order-status" class="status-badge"></span></p>
+                <p><strong>Phương thức thanh toán:</strong> <span id="modal-order-payment"></span></p>
+            </div>
+
+            <div class="order-shipping-address" style="margin-bottom: 20px; padding-bottom:15px; border-bottom: 1px solid #eee;">
+                <h4>Địa chỉ giao hàng</h4>
+                <p id="modal-shipping-name"></p>
+                <p id="modal-shipping-phone"></p>
+                <p id="modal-shipping-address"></p>
+            </div>
+
+            <h4>Các sản phẩm</h4>
+            <table class="order-products-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                <tr>
+                    <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd; width: 45%;">Sản phẩm</th>
+                    <th style="text-align:right; padding:8px; border-bottom:1px solid #ddd; width: 15%;">Đơn giá</th>
+                    <th style="text-align:center; padding:8px; border-bottom:1px solid #ddd; width: 15%;">Số lượng</th>
+                    <th style="text-align:right; padding:8px; border-bottom:1px solid #ddd; width: 25%;">Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody id="modal-order-products">
+                </tbody>
+            </table>
+
+            <div class="order-total-summary" style="text-align: right; padding-top:15px; border-top:1px solid #eee;">
+                <h4 style="font-size: 1.2em;">Tổng cộng: <span id="modal-order-totalamount" style="color: #c0392b; font-weight: bold;"></span></h4>
+            </div>
+            <div id="modal-cancel-order-container" style="text-align: right; margin-top: 20px;">
+            </div>
+        </div>
+        <div id="orderDetailMessage" class="message-area" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name">Công ty thực phẩm GreenFood</p>
+        <p class="web-author">75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script src="assets/js/order-history.js"></script>
+</body>
+</html>

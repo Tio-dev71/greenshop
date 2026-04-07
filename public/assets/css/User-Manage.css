@@ -1,0 +1,409 @@
+body {
+  font-family: Arial;
+  margin: 0;
+  display: flex;
+}
+
+.logo img{
+  height: 80px;
+  width: 80px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+.sidebar {
+  width: 250px;
+  height: 120vh;
+  background-color: #CDF96E;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sidebar .logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.sidebar nav {
+  flex: 1;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li a {
+  display: block;
+  padding: 25px;
+  color: black;
+  text-decoration: none;
+}
+
+.QLTK{
+  font-weight: bold;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.stick {
+  margin-right: -23px;
+}
+
+.sidebar nav ul li a.active,
+.sidebar nav ul li a:hover {
+  background-color: #218838;
+}
+
+.sidebar-footer {
+  background-color: #15012E;
+  width: calc(100%+40px);
+  height: 80px;
+  margin: 0;
+  margin-top: auto;
+  display: flex;
+  margin-right: -20px;
+  margin-left: -20px;
+  margin-bottom: -20px;
+}
+
+.sidebar-footer .logout {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  margin-left: 60px;
+  margin-top: 30px;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right-header {
+  display: flex;
+  align-items: center;
+}
+
+.inbox {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.avatar img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.main-content {
+  padding: 20px;
+}
+
+.search-add {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.search-add input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  width: 70%;
+}
+
+.search-add button.add-new {
+  background-color: #553C9A;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-table .thead{
+  background-color: #EDF2F7;
+  color: white;
+}
+
+.product-table th {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  background-color: #7f8c8d;
+}
+
+.product-table td {
+  border: 1px solid #ddd;
+  padding: 15px;
+}
+
+/* Style cho tài khoản bị khóa */
+.locked-user {
+  background-color: #ffcccc;
+}
+
+.action{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action button{
+  background-color: #CDF96E;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.pagination{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.them-moi{
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  background: #fff;
+  width: 700px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 2px 5px 0 rgba(51, 62, 73, 0.1);
+  border-radius: 24px;
+  position: relative;
+}
+
+.form h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+  width: 48%;
+}
+
+.form-row .form-group {
+  width: 48%;
+}
+
+.form-label {
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  background: white;
+  padding: 0 8px;
+  font-size: 12px;
+  color: #888;
+}
+
+.form-control {
+  height: 40px;
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #888;
+  font-size: 14px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.form-submit, .form-cancel {
+  width: 150px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+.status-active {
+    color: green;
+    font-weight: bold;
+}
+.status-locked {
+    color: red;
+    font-style: italic;
+}
+.locked-user td { /* Thêm style cho cả dòng nếu user bị khóa, giống như HTML mẫu của bạn */
+    background-color: #ffe0e0; /* Màu nền nhạt cho user bị khóa */
+}
+
+
+/* Style cho nút phân trang (ví dụ) */
+.pagination button {
+    padding: 8px 12px;
+    margin: 0 4px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.pagination button:hover:not(:disabled) {
+    background-color: #e9e9e9;
+}
+.pagination button.active {
+    background-color: #CDF96E; /* Hoặc màu active bạn muốn */
+    color: black;
+    border-color: #CDF96E;
+    font-weight: bold;
+}
+.pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Style cho message area (nếu bạn muốn tùy chỉnh thêm) */
+.message-area {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-weight: 500;
+    display: none; /* Ẩn ban đầu */
+}
+.message-area.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+.message-area.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.form-submit {
+  background-color: #553C9A;
+  color: white;
+}
+
+.form-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.filters-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.filters-container > div { /* Áp dụng cho các div con trực tiếp chứa label và select */
+    display: flex;
+    align-items: center;
+}
+.filters-container label {
+    margin-right: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+.filters-container select {
+    padding: 8px 10px; /* Điều chỉnh padding nếu cần */
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 0.9em; /* Điều chỉnh font-size nếu cần */
+}
+
+.search-add input[type="text"] {
+    flex-grow: 1; /* Cho phép ô tìm kiếm co giãn */
+    margin-right: 15px; /* Nếu có nút "Thêm mới" bên cạnh */
+}
+
+.search-add {
+    display: flex;
+}
+
+/* Thêm vào cuối file Order-Manage.css hoặc thay thế các style pagination cũ */
+.pagination { /* Đảm bảo style này vẫn giữ nguyên hoặc được điều chỉnh nếu cần */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 0 4px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.pagination button:hover:not(:disabled) {
+    background-color: #e9e9e9;
+}
+.pagination button.active {
+    background-color: #CDF96E; /* Màu active như bạn muốn */
+    color: black;
+    border-color: #CDF96E;
+    font-weight: bold;
+}
+.pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}

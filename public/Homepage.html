@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenFood - Trang chủ</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/Homepage.css">
+</head>
+<body class="page-shell homepage-body">
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="Homepage.html" class="brand">
+            <img src="assets/img/logo.png" alt="GreenFood Logo">
+            <div class="brand-text">
+                <strong>GreenFood</strong>
+                <span>Mua thực phẩm sạch theo cách dễ chịu hơn</span>
+            </div>
+        </a>
+        <div class="header-nav">
+            <div class="header-user">Xin chào, <strong id="user-name-display">bạn</strong></div>
+            <div class="icon-links icons">
+                <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+                <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+                <a href="Notification.html" title="Thông báo"><i class="fas fa-bell"></i></a>
+                <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+                <i class="fas fa-arrow-right" id="logout-icon" title="Đăng xuất"></i>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="hero home-hero">
+        <div class="container split-layout">
+            <div class="home-copy">
+                <span class="eyebrow">✨ Trải nghiệm mới · Hiện đại hơn · Nhóm 3</span>
+                <h1 class="section-title" id="welcome-user-title">Chào mừng bạn đến với GreenFood</h1>
+                <p class="section-subtitle">Chào mừng tới với nền tảng mua bán thực phẩm sạch đảm bảo an toàn.</p>
+                <div class="hero-actions">
+                    <a href="Product-list.html" class="btn btn-primary">Bắt đầu mua sắm</a>
+                    <a href="Cart.html" class="btn btn-secondary">Xem giỏ hàng</a>
+                </div>
+                <div class="pill-list">
+                    <span class="action-pill">Rau củ theo mùa</span>
+                    <span class="action-pill">Thịt cá tươi mỗi ngày</span>
+                    <span class="action-pill">Thanh toán thuận tiện</span>
+                </div>
+            </div>
+            <div class="marketing-card glass hero-showcase">
+                <img src="assets/img/background.jpg" alt="GreenFood Background">
+                <div class="showcase-panel card">
+                    <h3>Điều hướng nhanh</h3>
+                    <div class="quick-actions">
+                        <a href="Product-list.html">Sản phẩm</a>
+                        <a href="Order-history.html">Đơn hàng</a>
+                        <a href="User-info.html">Tài khoản</a>
+                        <a href="Notification.html">Thông báo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section home-sections">
+        <div class="container">
+            <div class="feature-grid">
+                <article class="feature-card card">
+                    <div class="icon">🧺</div>
+                    <h3>Tốc độ giao hàng nhanh</h3>
+                    <p>Giao hàng hỏa tốc cho khách hàng - Đặt là giao.</p>
+                </article>
+                <article class="feature-card card">
+                    <div class="icon">🚚</div>
+                    <h3>Theo dõi đơn dễ hơn</h3>
+                    <p>Cho phép khách hàng theo dõi hành trình của đơn hàng.</p>
+                </article>
+                <article class="feature-card card">
+                    <div class="icon">💚</div>
+                    <h3>Tạo cảm giác sạch và tin</h3>
+                    <p>Đầy đủ giấy chứng nhận đảm bảo an toàn thực phẩm.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-copy">
+            <strong>Công ty thực phẩm GreenFood</strong>
+            <span>Nền tảng mua bán thực phẩm đảm bảo an toàn.</span>
+        </div>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const API_BASE_URL = window.location.origin;
+
+    function getAuthToken() {
+        return localStorage.getItem('authToken');
+    }
+
+    function getAuthHeaders() {
+        const token = getAuthToken();
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    }
+
+    function getAuthUser() {
+        const userString = localStorage.getItem('authUser');
+        if (userString) {
+            try {
+                return JSON.parse(userString);
+            } catch (e) {
+                console.error("Error parsing authUser from localStorage", e);
+                localStorage.removeItem('authUser');
+                return null;
+            }
+        }
+        return null;
+    }
+
+    async function logoutUser() {
+        const token = getAuthToken();
+        if (token) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Server logout failed.', errorData.message || errorData);
+                }
+            } catch (error) {
+                console.error('Error calling server logout API:', error);
+            }
+        }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        window.location.href = 'Login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutIcon = document.getElementById('logout-icon');
+        const welcomeUserTitle = document.getElementById('welcome-user-title');
+        const userNameDisplay = document.getElementById('user-name-display');
+
+        const token = getAuthToken();
+        const user = getAuthUser();
+
+        if (!token) {
+            window.location.href = 'Login.html';
+            return;
+        }
+
+        if (user && user.name) {
+            if (welcomeUserTitle) {
+                welcomeUserTitle.textContent = `Chào mừng ${user.name}`;
+            }
+            if (userNameDisplay) {
+                userNameDisplay.textContent = user.name;
+            }
+        } else {
+            if (welcomeUserTitle) {
+                welcomeUserTitle.textContent = 'Chào mừng bạn đến với GreenFood';
+            }
+        }
+
+        if (logoutIcon) {
+            logoutIcon.addEventListener('click', function() {
+                if (confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+                    logoutUser();
+                }
+            });
+        }
+
+        async function fetchAndVerifyUser() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user`, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    const serverUser = await response.json();
+                    localStorage.setItem('authUser', JSON.stringify(serverUser));
+                    if (welcomeUserTitle && serverUser.name) {
+                        welcomeUserTitle.textContent = `Chào mừng ${serverUser.name}`;
+                    }
+                    if (userNameDisplay && serverUser.name) {
+                        userNameDisplay.textContent = serverUser.name;
+                    }
+                } else if (response.status === 401) {
+                    logoutUser();
+                } else {
+                    console.error('Failed to verify user with server:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error verifying user with server:', error);
+            }
+        }
+
+        fetchAndVerifyUser();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/User-Manage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Style cho khu vực filters */
+        .filters-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filters-container > div {
+            display: flex;
+            align-items: center;
+        }
+        .filters-container label {
+            margin-right: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .filters-container select {
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<script>
+    // Script bảo vệ trang admin (giữ nguyên)
+    (function protectAdminPage() {
+        const token = localStorage.getItem('authToken');
+        const authUserString = localStorage.getItem('authUser');
+        let isAdmin = false;
+        if (token && authUserString) {
+            try {
+                const authUser = JSON.parse(authUserString);
+                if (authUser && authUser.Role === 1) {
+                    isAdmin = true;
+                }
+            } catch (e) { console.error("Error parsing authUser for admin check", e); }
+        }
+        if (!isAdmin) {
+            console.log('Access to admin page denied. Redirecting to login.');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = 'Login.html';
+        } else {
+            console.log('Admin access granted.');
+        }
+    })();
+</script>
+<div class="container">
+    <aside class="sidebar">
+        <a href="Homepage.html" class="logo"> <img src="assets/img/logo.png" alt="GreenFood Logo"> </a>
+        <nav>
+            <ul>
+                <li><a href="Product-Manage.html" class="QLSP">Quản lý sản phẩm</a></li>
+                <li class="menu-item">
+                    <a href="User-Manage.html" class="QLTK">Quản lý tài khoản</a>
+                    <img src="assets/img/red-stick.png" alt="Stick" class="stick"> </li>
+                <li><a href="Order-Manage.html" class="QLDH">Quản lý đơn hàng</a></li>
+                <li><a href="Revenue-Manage.html" class="QLDT">Quản lý doanh thu</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a class="logout" id="admin-logout-button" href="#">Đăng xuất</a>
+        </div>
+    </aside>
+    <main class="content">
+        <header class="header">
+            <div class="left-header">QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG</div>
+            <div class="right-header">
+                <span id="admin-name-display" style="margin-right: 10px;"></span>
+                <div class="avatar"><img src="assets/img/Admin-avatar.png" alt="Avatar"></div> </div>
+        </header>
+        <div class="main-content">
+            <div class="search-add">
+                <input type="text" id="user-search-input" placeholder="Tìm kiếm theo ID, tên, email, SĐT...">
+            </div>
+
+            <div class="filters-container">
+                <div>
+                    <label for="user-status-filter">Trạng thái:</label>
+                    <select id="user-status-filter">
+                        <option value="">Tất cả</option>
+                        <option value="1">Hoạt động</option>
+                        <option value="0">Bị khóa</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="user-sort-by">Sắp xếp theo:</label>
+                    <select id="user-sort-by">
+                        <option value="created_at">Ngày tạo</option>
+                        <option value="id">ID</option>
+                        <option value="name">Họ tên</option>
+                        <option value="email">Email</option>
+                        <option value="orders_count">Số đơn đã mua</option>
+                        <option value="total_spending">Tổng chi tiêu</option>
+                        <option value="Status">Trạng thái</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="user-sort-direction">Thứ tự:</label>
+                    <select id="user-sort-direction">
+                        <option value="desc">Giảm dần (Mới nhất/Lớn nhất)</option>
+                        <option value="asc">Tăng dần (Cũ nhất/Nhỏ nhất)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="user-manager-message" class="message-area" style="text-align:center; margin-bottom:15px;"></div>
+            <table class="product-table"> <thead class="thead">
+            <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Số đơn đã mua</th>
+                <th>Tổng chi tiêu</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+                <tbody id="user-table-body">
+                </tbody>
+            </table>
+            <div class="pagination" id="pagination-controls">
+            </div>
+        </div>
+    </main>
+</div>
+<script src="assets/js/user-manage.js"></script> </body>
+</html>

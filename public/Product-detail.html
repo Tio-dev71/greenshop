@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sản phẩm | GreenFood</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/Product-detail.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Thêm style cho thông báo */
+        .message-container {
+            text-align: center;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none; /* Ẩn ban đầu */
+        }
+        .message-container.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message-container.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        /* CSS cho phần giá cũ và giá mới */
+        .original-price {
+            text-decoration: line-through;
+            color: #888;
+            font-size: 0.8em; /* Nhỏ hơn giá chính */
+            margin-right: 10px;
+        }
+        .discounted-price {
+            color: red; /* Hoặc màu bạn muốn cho giá khuyến mãi */
+            font-weight: bold;
+        }
+        .price-container {
+            display: flex;
+            align-items: baseline; /* Căn chỉnh giá và đơn vị tiền tệ */
+        }
+        .main-price-value {
+            font-size: 40px;
+            font-weight: 900;
+        }
+        .currency-unit {
+            font-size: 30px; /* Kích thước nhỏ hơn cho chữ 'đ' */
+            font-weight: 900;
+            text-decoration-line: underline;
+            margin-left: 2px;
+        }
+        .product-description {
+            margin-top: 20px;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #555;
+            max-height: 150px; /* Giới hạn chiều cao mô tả */
+            overflow-y: auto; /* Thêm thanh cuộn nếu mô tả dài */
+            padding-right: 10px; /* Để thanh cuộn không đè chữ */
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="logo">
+        <a href="Homepage.html"><img src="assets/img/logo.png" alt="GreenFood Logo"></a> </div>
+    <div class="icons">
+        <a href="Cart.html" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i></a>
+        <a href="Order-history.html" title="Lịch sử đơn hàng"><i class="fas fa-sync-alt"></i></a>
+        <a href="Notification.html"><i class="fas fa-bell"></i></a>
+        <a href="User-info.html" title="Tài khoản"><i class="fas fa-user"></i></a>
+        <i class="fas fa-arrow-right" id="logout-icon-detail" title="Đăng xuất" style="cursor:pointer;"></i>
+    </div>
+</header>
+
+<div class="container">
+    <div id="product-detail-content">
+        <p style="text-align: center; padding: 50px;">Đang tải thông tin sản phẩm...</p>
+    </div>
+
+    <div class="message-container" id="user-message"></div>
+
+    <div class="container__suggest">
+        <h1>Sản phẩm gợi ý cho bạn</h1>
+        <div class="container__suggest--products" id="suggested-products-grid">
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <p class="Company-name"> Công ty thực phẩm GreenFood</p>
+        <p class="web-author">75DCTT21524 - Nguyễn Đình Thọ</p>
+        <div class="social-media">
+            <a href="#" class="X-button"><img src="assets/img/X.png" alt="X"></a>
+            <a href="#" class="instagram-button"><img src="assets/img/instagram.png" alt="Instagram"></a>
+            <a href="#" class="youtube-button"><img src="assets/img/youtube.png" alt="Youtube"></a>
+            <a href="#" class="linkedin-button"><img src="assets/img/linkedin.png" alt="LinkedIn"></a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const API_BASE_URL = window.location.origin;
+
+    // --- Authentication Helper Functions (Nên đưa vào file JS dùng chung) ---
+    function getAuthToken() {
+        return localStorage.getItem('authToken');
+    }
+
+    function getAuthHeaders(isFormData = false) {
+        const token = getAuthToken();
+        const headers = { 'Accept': 'application/json' };
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    }
+    async function logoutUserDetail() {
+        if (getAuthToken()) {
+            try {
+                await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST', headers: getAuthHeaders() });
+            } catch (e) { console.error('Logout API call failed', e); }
+        }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        window.location.href = 'Login.html';
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const productDetailContent = document.getElementById('product-detail-content');
+        const userMessageContainer = document.getElementById('user-message');
+        const suggestedProductsGrid = document.getElementById('suggested-products-grid');
+        const logoutIconDetail = document.getElementById('logout-icon-detail');
+
+        if(logoutIconDetail) {
+            logoutIconDetail.addEventListener('click', () => {
+                if(confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
+                    logoutUserDetail();
+                }
+            });
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        function displayUserMessage(message, type = 'error') {
+            if(userMessageContainer) {
+                userMessageContainer.textContent = message;
+                userMessageContainer.className = `message-container ${type}`;
+                userMessageContainer.style.display = 'block';
+                setTimeout(() => {
+                    userMessageContainer.style.display = 'none';
+                }, 3000); // Ẩn thông báo sau 3 giây
+            } else {
+                alert(message);
+            }
+        }
+
+        function formatCurrency(amount) {
+            return Number(amount).toLocaleString('vi-VN');
+        }
+
+        async function fetchProductDetails() {
+            if (!productId) {
+                productDetailContent.innerHTML = '<p style="text-align: center; color: red;">Không tìm thấy ID sản phẩm.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+                    headers: getAuthHeaders() // Không cần token cho public API này, nhưng có thể giữ lại nếu API chung
+                });
+                if (!response.ok) {
+                    throw new Error(`Lỗi ${response.status}: Không thể tải chi tiết sản phẩm.`);
+                }
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    renderProductDetails(result.data);
+                } else {
+                    throw new Error(result.message || 'Không thể tải chi tiết sản phẩm.');
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải chi tiết sản phẩm:', error);
+                productDetailContent.innerHTML = `<p style="text-align: center; color: red;">${error.message}</p>`;
+            }
+        }
+
+        function renderProductDetails(product) {
+            const imageUrl = product.Image ?
+                (product.Image.startsWith('http') ? product.Image : `${API_BASE_URL}/storage/${product.Image}`) :
+                'assets/img/placeholder.png'; // Cập nhật placeholder nếu cần
+
+            let priceDisplayHTML = '';
+            const originalPrice = parseFloat(product.Price);
+            const discount = parseFloat(product.Discount); // Giả sử Discount là 0.xx
+
+            if (discount > 0) {
+                const discountedPrice = originalPrice * (1 - discount);
+                priceDisplayHTML = `
+                    <span class="original-price">${formatCurrency(originalPrice)}</span>
+                    <span class="discounted-price main-price-value">${formatCurrency(discountedPrice)}</span>
+                    <p class="currency-unit">đ</p>
+                `;
+            } else {
+                priceDisplayHTML = `<h1 class="main-price-value">${formatCurrency(originalPrice)}</h1><p class="currency-unit">đ</p>`;
+            }
+
+            const discountPercentage = discount > 0 ? `${(discount * 100).toFixed(0)}%` : '';
+
+            productDetailContent.innerHTML = `
+                <div class="container__product">
+                    <div class="container__product--img">
+                        <img src="${imageUrl}" alt="${product.ProductName || 'Ảnh sản phẩm'}">
+                    </div>
+                    <div class="container__product--information">
+                        <div class="container__product__information--name">
+                            <h1>${product.ProductName || 'N/A'}</h1>
+                        </div>
+                        ${discount > 0 ? `<div class="container__product__information--deal"><p>-${discountPercentage}</p></div>` : ''}
+                        <div class="container__product__information--price price-container">
+                            ${priceDisplayHTML}
+                        </div>
+                        <div class="container__product__information--quantity">
+                            <h3>Số lượng</h3>
+                            <button class="quantity-change" data-action="decrease">-</button>
+                            <input type="number" id="quantity-input" value="1" min="1" max="${product.Quantity || 10}">
+                            <button class="quantity-change" data-action="increase">+</button>
+                            <span style="margin-left: 10px; font-size: 0.9em; color: #777;">(Còn lại: ${product.Quantity || 0})</span>
+                        </div>
+                        <div class="container__product__information--button">
+                            <button id="add-to-cart-btn" ${product.Quantity > 0 ? '' : 'disabled'}>
+                                ${product.Quantity > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
+                            </button>
+                        </div>
+                        ${product.Description ? `<div class="product-description"><h3>Mô tả sản phẩm:</h3><p>${product.Description.replace(/\n/g, '<br>')}</p></div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for quantity buttons
+            const quantityInput = document.getElementById('quantity-input');
+            document.querySelectorAll('.quantity-change').forEach(button => {
+                button.addEventListener('click', function() {
+                    let currentValue = parseInt(quantityInput.value);
+                    const action = this.dataset.action;
+                    const maxQuantity = parseInt(quantityInput.max);
+
+                    if (action === 'increase' && currentValue < maxQuantity) {
+                        quantityInput.value = currentValue + 1;
+                    } else if (action === 'decrease' && currentValue > 1) {
+                        quantityInput.value = currentValue - 1;
+                    }
+                });
+            });
+
+            quantityInput.addEventListener('change', function() {
+                let value = parseInt(this.value);
+                const min = parseInt(this.min);
+                const max = parseInt(this.max);
+                if (isNaN(value) || value < min) {
+                    this.value = min;
+                } else if (value > max) {
+                    this.value = max;
+                }
+            });
+
+
+            // Add to cart button event listener
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', async () => {
+                    const token = getAuthToken();
+                    if (!token) {
+                        displayUserMessage('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.', 'error');
+                        // Optional: redirect to login after a delay
+                        // setTimeout(() => { window.location.href = 'Login.html'; }, 2000);
+                        return;
+                    }
+
+                    const quantity = parseInt(document.getElementById('quantity-input').value);
+                    if (quantity <= 0) {
+                        displayUserMessage('Số lượng phải lớn hơn 0.', 'error');
+                        return;
+                    }
+
+                    try {
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.textContent = 'Đang thêm...';
+
+                        const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({
+                                product_id: productId,
+                                quantity: quantity
+                            })
+                        });
+                        const cartResult = await response.json();
+
+                        if (response.ok && cartResult.success) {
+                            displayUserMessage('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                            // Optional: Update cart icon count or redirect to cart
+                        } else {
+                            let errorMsg = cartResult.message || 'Không thể thêm vào giỏ hàng.';
+                            if (cartResult.errors) {
+                                for(const field in cartResult.errors) {
+                                    errorMsg += `\n${cartResult.errors[field].join(', ')}`;
+                                }
+                            }
+                            if(cartResult.available_stock !== undefined){
+                                errorMsg += ` Số lượng tồn kho hiện tại: ${cartResult.available_stock}.`;
+                            }
+                            displayUserMessage(errorMsg, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Lỗi khi thêm vào giỏ hàng:', error);
+                        displayUserMessage('Lỗi kết nối khi thêm vào giỏ hàng.', 'error');
+                    } finally {
+                        addToCartBtn.disabled = product.Quantity <= 0; // Re-disable if out of stock
+                        addToCartBtn.textContent = product.Quantity > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng';
+                    }
+                });
+            }
+        }
+
+        async function fetchSuggestedProducts() {
+            if (!suggestedProductsGrid) return;
+            try {
+                // Lấy 4 sản phẩm ngẫu nhiên hoặc theo logic gợi ý của bạn
+                // Ví dụ: lấy sản phẩm cùng category, hoặc các sản phẩm mới nhất
+                // Hiện tại, lấy 4 sản phẩm đầu tiên (bạn có thể thêm ?per_page=4&page=X&sort_by=random nếu API hỗ trợ)
+                const response = await fetch(`${API_BASE_URL}/api/products?per_page=4`);
+                if (!response.ok) return;
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.data) {
+                    renderSuggestedProducts(result.data.data.filter(p => p.ProductID != productId)); // Lọc bỏ sản phẩm hiện tại
+                }
+            } catch (error) {
+                console.error('Lỗi tải sản phẩm gợi ý:', error);
+            }
+        }
+
+        function renderSuggestedProducts(products) {
+            if (!suggestedProductsGrid) return;
+            suggestedProductsGrid.innerHTML = '';
+            products.slice(0, 4).forEach(product => { // Giới hạn 4 sản phẩm
+                const imageUrl = product.Image ?
+                    (product.Image.startsWith('http') ? product.Image : `${API_BASE_URL}/storage/${product.Image}`) :
+                    'assets/img/placeholder.png';
+
+                let priceDisplay = formatCurrency(product.Price);
+                if (product.Discount && parseFloat(product.Discount) > 0) {
+                    const discountedPrice = parseFloat(product.Price) * (1 - parseFloat(product.Discount));
+                    priceDisplay = `<span style="text-decoration: line-through; color: #aaa; font-size:0.9em;">${formatCurrency(product.Price)}</span> ${formatCurrency(discountedPrice)}`;
+                }
+
+
+                const productItemHTML = `
+                    <a href="Product-detail.html?id=${product.ProductID}" class="container__suggest--products__item">
+                        <div class="container__suggest--products__item--img">
+                            <img src="${imageUrl}" alt="${product.ProductName}">
+                        </div>
+                        <div class="container__suggest--products__item--name">
+                            <h1>${product.ProductName}</h1>
+                        </div>
+                        <div class="container__suggest--products__item--price">
+                            <h1>${priceDisplay} đ</h1>
+                        </div>
+                    </a>
+                `;
+                suggestedProductsGrid.innerHTML += productItemHTML;
+            });
+        }
+
+
+        // --- Khởi chạy ---
+        if (productId) {
+            fetchProductDetails();
+            fetchSuggestedProducts();
+        } else {
+            productDetailContent.innerHTML = '<p style="text-align: center; color: red;">ID sản phẩm không hợp lệ.</p>';
+        }
+    });
+</script>
+</body>
+</html>
