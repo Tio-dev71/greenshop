@@ -35,3 +35,20 @@ Route::get('/debug-db', function () {
         ], 500);
     }
 });
+
+Route::get('/ping', function () {
+    return 'pong';
+});
+
+Route::get('/env-check', function () {
+    return response()->json([
+        'app_env' => env('APP_ENV'),
+        'app_debug' => env('APP_DEBUG'),
+        'app_url' => env('APP_URL'),
+        'db_default' => config('database.default'),
+        'db_host' => config('database.connections.pgsql.host'),
+        'db_port' => config('database.connections.pgsql.port'),
+        'db_database' => config('database.connections.pgsql.database'),
+        'db_username' => config('database.connections.pgsql.username'),
+    ]);
+});
