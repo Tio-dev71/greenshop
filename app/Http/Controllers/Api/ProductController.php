@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth; // << THÊM DÒNG NÀY
+use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
@@ -100,8 +101,10 @@ class ProductController extends Controller
         $productData = $validator->validated();
 
         if ($request->hasFile('ImageFile')) {
-            $path = $request->file('ImageFile')->store('products', 'public');
-            $productData['Image'] = $path; // Lưu đường dẫn vào cột Image
+            $uploaded = $request->file('ImageFile')->storeOnCloudinary('greenfood/products');
+
+            $productData['Image'] = $uploaded->getSecurePath();     // URL đầy đủ
+            $productData['ImagePublicId'] = $uploaded->getPublicId(); // để xóa/sửa sau này
         }
         // Xóa ImageFile khỏi productData nếu có, vì nó không phải là cột trong DB
         if (isset($productData['ImageFile'])) {
@@ -168,12 +171,18 @@ class ProductController extends Controller
         $productData = $validator->validated();
 
         if ($request->hasFile('ImageFile')) {
-            // Xóa ảnh cũ nếu có và nếu có ảnh mới được tải lên
-            if ($product->Image && Storage::disk('public')->exists($product->Image)) {
-                Storage::disk('public')->delete($product->Image);
+            if (!empty($product->ImagePublicId)) {
+                try {
+                    Cloudinary::destroy($product->ImagePublicId);
+                } catch (\Throwable $e) {
+
+                }
             }
-            $path = $request->file('ImageFile')->store('products', 'public');
-            $productData['Image'] = $path;
+
+            $uploaded = $request->file('ImageFile')->storeOnCloudinary('greenfood/products');
+
+            $productData['Image'] = $uploaded->getSecurePath();
+            $productData['ImagePublicId'] = $uploaded->getPublicId();
         }
         if (isset($productData['ImageFile'])) {
             unset($productData['ImageFile']);
@@ -191,7 +200,7 @@ class ProductController extends Controller
     /**
      * ADMIN: Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Product $product) // Thường là DELETE /api/admin/products/{product}
+    public function destroy(Request $request, Product $product)
     {
         // Kiểm tra quyền admin
         if (!$this->isAdmin($request)) {

@@ -24,6 +24,8 @@ use App\Http\Middleware\CheckAdminRole; // Import middleware
 //======================================================================
 Route::post('/signup', [AuthController::class, 'signup'])->name('api.signup');
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('api.forgot-password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('api.reset-password');
 
 Route::prefix('products')->name('api.public.products.')->group(function () {
     Route::get('/', [ProductController::class, 'listPublicProducts'])->name('index'); // GET /api/products

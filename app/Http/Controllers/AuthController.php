@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -105,5 +109,72 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'No authenticated user to logout or token invalid.'], 401);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            // Trả về thành công giả để tránh leak email người dùng
+            return response()->json(['message' => 'Nếu email tồn tại trong hệ thống, bạn sẽ sớm nhận được liên kết đặt lại mật khẩu.']);
+        }
+
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'email' => $request->email,
+                'token' => Hash::make($token),
+                'created_at' => Carbon::now()
+            ]
+        );
+
+        // Giả sử frontend url là origin của request
+        $frontendUrl = $request->headers->get('referer') ? parse_url($request->headers->get('referer'), PHP_URL_SCHEME) . '://' . parse_url($request->headers->get('referer'), PHP_URL_HOST) : url('/');
+        // Link dự kiến: public/Reset-Password.html?token=...&email=...
+        $resetLink = $frontendUrl . "/Reset-Password.html?token=" . $token . "&email=" . urlencode($request->email);
+
+        Mail::raw("Chào bạn,\n\nBạn nhận được email này vì chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n\nLiên kết đặt lại mật khẩu: " . $resetLink . "\n\nLiên kết này sẽ hết hạn sau 60 phút.\n\nNếu bạn không yêu cầu đặt lại mật khẩu, bạn có thể bỏ qua email này.", function ($message) use ($request) {
+            $message->to($request->email)->subject('Thông báo đặt lại mật khẩu - GreenFood');
+        });
+
+        return response()->json(['message' => 'Liên kết đặt lại mật khẩu đã được gửi vào email của bạn.']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $reset = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if (!$reset || !Hash::check($request->token, $reset->token)) {
+            return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn.'], 400);
+        }
+
+        // Hết hạn sau 60 phút
+        if (Carbon::parse($reset->created_at)->addMinutes(60)->isPast()) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return response()->json(['message' => 'Token đã hết hạn.'], 400);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json(['message' => 'Mật khẩu của bạn đã được cập nhật thành công!']);
     }
 }

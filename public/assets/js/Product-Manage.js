@@ -174,7 +174,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td>${product.Quantity || 0}</td>
                 <td>${product.Category || 'N/A'}</td>
                 <td>
-                    <img src="${imageUrl}" alt="${product.ProductName || 'Ảnh'}" style="width:50px; height:50px; object-fit:cover; border: 1px solid #ddd; vertical-align: middle;">
+                    <img src="${imageUrl}" alt="${product.ProductName || 'Ảnh'}" 
+                         onerror="this.src='assets/img/placeholder.png'; this.onerror=null;"
+                         style="width:50px; height:50px; object-fit:cover; border: 1px solid #ddd; vertical-align: middle;">
                     <button class="view-image-btn button-link-style" data-imageurl="${fullImageUrlForModal}" style="margin-left: 5px; vertical-align: middle;">Xem</button>
                 </td>
                 <td class="action">
@@ -443,32 +445,65 @@ document.addEventListener("DOMContentLoaded", function () {
                     alert("Lỗi khi lấy thông tin sản phẩm để sửa.");
                 }
             }
-            else if (event.target.classList.contains('view-image-btn')) {
-                const imageUrl = event.target.dataset.imageurl;
-                if (imageUrl && imageUrl !== 'assets/img/placeholder.png' && !imageUrl.endsWith('undefined') && !imageUrl.endsWith('null')) {
+            else if (targetButton.classList.contains('view-image-btn')) {
+                const imageUrl = targetButton.dataset.imageurl;
+                
+                // Cải thiện kiểm tra placeholder hoặc url không hợp lệ
+                const isInvalidUrl = !imageUrl || 
+                                     imageUrl.includes('placeholder.png') || 
+                                     imageUrl.endsWith('undefined') || 
+                                     imageUrl.endsWith('null') || 
+                                     imageUrl === `${API_BASE_URL}/storage/`;
+
+                if (!isInvalidUrl) {
                     const modal = document.createElement('div');
+                    modal.className = 'image-view-modal'; // Thêm class để dễ style nếu cần
                     modal.style.position = 'fixed';
                     modal.style.left = '0';
                     modal.style.top = '0';
                     modal.style.width = '100%';
                     modal.style.height = '100%';
-                    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                    modal.style.backgroundColor = 'rgba(0,0,0,0.85)';
                     modal.style.display = 'flex';
                     modal.style.justifyContent = 'center';
                     modal.style.alignItems = 'center';
                     modal.style.zIndex = '2000';
+                    modal.style.cursor = 'zoom-out';
                     modal.onclick = function() { if (document.body.contains(modal)) document.body.removeChild(modal); };
+
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.style.position = 'relative';
+
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.style.maxWidth = '90vw';
                     img.style.maxHeight = '90vh';
-                    img.style.border = '3px solid white';
-                    img.style.borderRadius = '5px';
+                    img.style.border = '5px solid white';
+                    img.style.borderRadius = '8px';
+                    img.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+                    img.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     img.onclick = function(e) { e.stopPropagation(); };
-                    modal.appendChild(img);
+                    
+                    // Thêm hiệu ứng zoom nhẹ khi hiện
+                    setTimeout(() => { img.style.transform = 'scale(1)'; }, 10);
+                    img.style.transform = 'scale(0.8)';
+
+                    const closeBtn = document.createElement('span');
+                    closeBtn.innerHTML = '&times;';
+                    closeBtn.style.position = 'absolute';
+                    closeBtn.style.top = '-20px';
+                    closeBtn.style.right = '-20px';
+                    closeBtn.style.fontSize = '40px';
+                    closeBtn.style.color = 'white';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.style.fontWeight = 'bold';
+                    
+                    imgWrapper.appendChild(img);
+                    imgWrapper.appendChild(closeBtn);
+                    modal.appendChild(imgWrapper);
                     document.body.appendChild(modal);
                 } else {
-                    alert('Không có ảnh để xem hoặc ảnh là placeholder.');
+                    alert('Sản phẩm này hiện chưa có ảnh hoặc đang sử dụng ảnh mặc định.');
                 }
             }
         });

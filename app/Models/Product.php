@@ -42,6 +42,7 @@ class Product extends Model
         'Quantity',
         'Category',
         'Image',
+        'ImagePublicId',
         'Discount',
     ];
 

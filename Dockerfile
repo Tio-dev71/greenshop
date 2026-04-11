@@ -22,6 +22,11 @@ RUN printf '<Directory /var/www/html/public>\n\
 
 RUN composer install --no-dev --optimize-autoloader
 
+RUN rm -rf /var/www/html/public/storage \
+    && php artisan storage:link \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -h www-data:www-data /var/www/html/public/storage || true
+
 # Tạo đủ thư mục Laravel cần để chạy runtime
 RUN mkdir -p \
     /var/www/html/storage/framework/cache \
