@@ -101,10 +101,11 @@ class ProductController extends Controller
         $productData = $validator->validated();
 
         if ($request->hasFile('ImageFile')) {
-            $uploaded = $request->file('ImageFile')->storeOnCloudinary('greenfood/products');
+            $path = $request->file('ImageFile')->store('greenfood/products', 'cloudinary');
 
-            $productData['Image'] = $uploaded->getSecurePath();     // URL đầy đủ
-            $productData['ImagePublicId'] = $uploaded->getPublicId(); // để xóa/sửa sau này
+            $productData['Image'] = Storage::disk('cloudinary')->url($path);
+            $productData['ImagePublicId'] =
+                pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
         }
         // Xóa ImageFile khỏi productData nếu có, vì nó không phải là cột trong DB
         if (isset($productData['ImageFile'])) {
@@ -173,16 +174,19 @@ class ProductController extends Controller
         if ($request->hasFile('ImageFile')) {
             if (!empty($product->ImagePublicId)) {
                 try {
-                    Cloudinary::destroy($product->ImagePublicId);
+                    cloudinary()->uploadApi()->destroy($product->ImagePublicId, [
+                        'resource_type' => 'image',
+                    ]);
                 } catch (\Throwable $e) {
 
                 }
             }
 
-            $uploaded = $request->file('ImageFile')->storeOnCloudinary('greenfood/products');
+            $path = $request->file('ImageFile')->store('greenfood/products', 'cloudinary');
 
-            $productData['Image'] = $uploaded->getSecurePath();
-            $productData['ImagePublicId'] = $uploaded->getPublicId();
+            $productData['Image'] = Storage::disk('cloudinary')->url($path);
+            $productData['ImagePublicId'] =
+                pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
         }
         if (isset($productData['ImageFile'])) {
             unset($productData['ImageFile']);
