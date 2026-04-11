@@ -354,8 +354,18 @@ document.addEventListener("DOMContentLoaded", function () {
             formData.append('Quantity', parseInt(document.getElementById("productQuantity").value));
             formData.append('Description', document.getElementById("productDescription").value.trim() || '');
 
-            if (productImageFileInput.files[0]) {
-                formData.append('ImageFile', productImageFileInput.files[0]);
+            const selectedFile = productImageFileInput.files[0];
+            const maxSizeMB = 30;
+
+            if (selectedFile) {
+                if (selectedFile.size > maxSizeMB * 1024 * 1024) {
+                    alert(`Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn ${maxSizeMB}MB.`);
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Lưu';
+                    return;
+                }
+
+                formData.append('ImageFile', selectedFile);
             }
 
             let apiUrl = isEditing ? `${API_BASE_URL}/api/admin/products/${currentProductIdVal}` : `${API_BASE_URL}/api/admin/products`;

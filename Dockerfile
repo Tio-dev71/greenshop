@@ -1,5 +1,13 @@
 FROM php:8.3-apache
 
+RUN { \
+  echo 'upload_max_filesize=30M'; \
+  echo 'post_max_size=30M'; \
+  echo 'memory_limit=256M'; \
+  echo 'max_execution_time=120'; \
+  echo 'max_input_time=120'; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
 RUN apt-get update && apt-get install -y \
     git curl unzip zip libpq-dev libzip-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo pdo_pgsql pgsql zip

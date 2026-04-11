@@ -76,7 +76,10 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         if (!$this->isAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Admin access required.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.'
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -85,7 +88,7 @@ class ProductController extends Controller
             'Price' => 'required|numeric|min:0',
             'Quantity' => 'required|integer|min:0',
             'Category' => 'nullable|string|max:255',
-            'ImageFile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'ImageFile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:30720',
             'Discount' => 'nullable|numeric|min:0|max:1',
         ]);
 
@@ -124,7 +127,6 @@ class ProductController extends Controller
                 'data' => $product,
                 'message' => 'Product created successfully.'
             ], 201);
-
         } catch (\Throwable $e) {
             \Log::error('Cloudinary upload failed', [
                 'message' => $e->getMessage(),
@@ -164,37 +166,11 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        if ($request->hasFile('ImageFile')) {
-            try {
-                $path = $request->file('ImageFile')->store('greenfood/products', 'cloudinary');
-
-                if (!$path) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Upload ảnh thất bại: không nhận được đường dẫn từ Cloudinary.'
-                    ], 500);
-                }
-
-                $productData['Image'] = Storage::disk('cloudinary')->url($path);
-                $productData['ImagePublicId'] =
-                    pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
-            } catch (\Throwable $e) {
-                \Log::error('Cloudinary upload failed', [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Upload ảnh thất bại: ' . $e->getMessage(),
-                ], 500);
-            }
-        }
-
-        // Kiểm tra quyền admin
         if (!$this->isAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Admin access required.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.'
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -203,7 +179,7 @@ class ProductController extends Controller
             'Price' => 'required|numeric|min:0',
             'Quantity' => 'required|integer|min:0',
             'Category' => 'nullable|string|max:255',
-            'ImageFile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'ImageFile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:30720',
             'Discount' => 'nullable|numeric|min:0|max:1',
         ]);
 
@@ -217,34 +193,56 @@ class ProductController extends Controller
 
         $productData = $validator->validated();
 
-        if ($request->hasFile('ImageFile')) {
-            if (!empty($product->ImagePublicId)) {
-                try {
-                    cloudinary()->uploadApi()->destroy($product->ImagePublicId, [
-                        'resource_type' => 'image',
-                    ]);
-                } catch (\Throwable $e) {
-
+        try {
+            if ($request->hasFile('ImageFile')) {
+                if (!empty($product->ImagePublicId)) {
+                    try {
+                        cloudinary()->uploadApi()->destroy($product->ImagePublicId, [
+                            'resource_type' => 'image',
+                        ]);
+                    } catch (\Throwable $e) {
+                        \Log::warning('Cloudinary destroy failed', [
+                            'message' => $e->getMessage(),
+                            'public_id' => $product->ImagePublicId,
+                        ]);
+                    }
                 }
+
+                $path = $request->file('ImageFile')->store('greenfood/products', 'cloudinary');
+
+                if (!$path) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Upload ảnh thất bại: không nhận được đường dẫn từ Cloudinary.'
+                    ], 500);
+                }
+
+                $productData['Image'] = Storage::disk('cloudinary')->url($path);
+                $productData['ImagePublicId'] =
+                    pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
             }
 
-            $path = $request->file('ImageFile')->store('greenfood/products', 'cloudinary');
-
-            $productData['Image'] = Storage::disk('cloudinary')->url($path);
-            $productData['ImagePublicId'] =
-                pathinfo($path, PATHINFO_DIRNAME) . '/' . pathinfo($path, PATHINFO_FILENAME);
-        }
-        if (isset($productData['ImageFile'])) {
             unset($productData['ImageFile']);
+
+            $product->update($productData);
+
+            return response()->json([
+                'success' => true,
+                'data' => $product,
+                'message' => 'Product updated successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Product update failed', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Cập nhật sản phẩm thất bại: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $product->update($productData);
-
-        return response()->json([
-            'success' => true,
-            'data' => $product,
-            'message' => 'Product updated successfully.'
-        ]);
     }
 
     /**
@@ -253,7 +251,10 @@ class ProductController extends Controller
     public function destroy(Request $request, Product $product)
     {
         if (!$this->isAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Admin access required.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.'
+            ], 403);
         }
 
         if (!empty($product->ImagePublicId)) {
